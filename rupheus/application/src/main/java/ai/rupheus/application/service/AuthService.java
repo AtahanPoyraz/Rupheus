@@ -50,7 +50,7 @@ public class AuthService {
 
     public UserModel signIn(SignInRequest request) {
         return this.userRepository.findByEmail(request.getEmail())
-                .filter(user -> this.passwordEncoder.matches(request.getPassword(), user.getPassword()))
+                .filter(user -> this.passwordEncoder.matches(request.getPassword().trim(), user.getPassword()))
                 .orElseThrow(() ->
                         new IllegalArgumentException("Invalid credentials")
                 );

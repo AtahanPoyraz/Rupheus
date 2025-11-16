@@ -70,7 +70,9 @@ public class UserService {
     @Transactional
     public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest request) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("User not found with id: " + userId)
+                );
 
         if (request.getFirstName() != null) {
             user.setFirstName(request.getFirstName());
@@ -114,11 +116,12 @@ public class UserService {
     @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("User not found with id: " + userId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException("User not found with id: " + userId)
                 );
 
         this.userRepository.delete(user);
+
         return user;
     }
 }

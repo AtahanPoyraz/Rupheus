@@ -5,12 +5,7 @@ import ai.rupheus.application.dto.user.CreateUserRequest;
 import ai.rupheus.application.dto.user.UpdateUserByIdRequest;
 import ai.rupheus.application.dto.user.User;
 import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.service.JwtService;
 import ai.rupheus.application.service.UserService;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.lang.NonNull;
@@ -19,34 +14,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
-    private final JwtService jwtService;
 
     @Autowired
     public UserController(
-            UserService userService,
-            JwtService jwtService
+            UserService userService
     ) {
         this.userService = userService;
-        this.jwtService = jwtService;
     }
 
     @GetMapping("/me")
     public ResponseEntity<GenericResponse<?>> getCurrentUser(
             @NonNull HttpServletRequest request
     ) {
-        String jwtToken = this.getTokenFromCookie(request);
-        if (jwtToken == null || jwtToken.isEmpty()) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(
                             new GenericResponse<>(
@@ -57,24 +49,13 @@ public class UserController {
                     );
         }
 
-        Optional<UserModel> user = this.jwtService.extractUserFromJwtToken(jwtToken);
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.NOT_FOUND.value(),
-                                    "User not found",
-                                    null
-                            )
-                    );
-        }
-
+        UserModel fetchedUser = (UserModel) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "User fetched successfully",
-                                User.fromEntity(user.get())
+                                User.fromEntity(fetchedUser)
                         )
                 );
     }
@@ -165,15 +146,5 @@ public class UserController {
 
                         )
                 );
-    }
-
-    private String getTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> "SESSION_ID".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
     }
 }

@@ -67,7 +67,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter
+            AuthenticationFilter authenticationFilter
     ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
@@ -77,25 +77,24 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/actuator/health/actuator/health",
+                                "/actuator/health",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/v1/auth/**",
-                                "/api/v1/user/me"
+                                "/api/v1/auth/**"
                         )
                         .permitAll()
                         .requestMatchers(
-                                "/api/v1/auth/sign-out"
+                                "/api/v1/user/me"
                         )
                         .authenticated()
                         .requestMatchers(
                                 "/api/v1/admin/**",
-                                "api/v1/user/**"
+                                "/api/v1/user/**"
                         )
                         .hasAnyRole("ADMIN")
                         .anyRequest().denyAll()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

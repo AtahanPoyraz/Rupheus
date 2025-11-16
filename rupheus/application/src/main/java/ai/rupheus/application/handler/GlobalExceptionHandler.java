@@ -4,6 +4,7 @@ import ai.rupheus.application.dto.GenericResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -73,6 +74,20 @@ public class GlobalExceptionHandler {
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Invalid request",
+                                e.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<GenericResponse<?>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException e
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Invalid JSON format for one of the fields.",
                                 e.getMessage()
                         )
                 );

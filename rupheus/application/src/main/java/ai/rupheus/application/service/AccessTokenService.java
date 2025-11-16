@@ -16,37 +16,32 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class JwtService {
-    @Value("${security.jwt.secret_key}")
-    private String jwtSecretKey;
+public class AccessTokenService {
+    @Value("${security.access_token.secret_key}")
+    private String accessTokenSecretKey;
 
-    @Value("${security.jwt.reset_expiration}")
-    private long jwtResetExpiration;
+    @Value("${security.access_token.expiration}")
+    private long accessTokenExpiration;
 
     private final UserRepository userRepository;
 
     @Autowired
-    public JwtService(
+    public AccessTokenService(
             UserRepository userRepository
     ) {
         this.userRepository = userRepository;
     }
 
-    public Optional<UserModel> extractUserFromJwtToken(String jwtToken) {
-        SecretKey secretKey = this.getSignInKey(this.jwtSecretKey);
-        Claims claims = this.extract(jwtToken, secretKey);
-        UUID userId = UUID.fromString(claims.getSubject());
-        return this.userRepository.findById(userId);
+    public Optional<UserModel> extractUserFromAccessToken(String accessToken) {
+        return this.userRepository.findById(UUID.fromString(this.extract(accessToken, this.getSignInKey(this.accessTokenSecretKey)).getSubject()));
     }
 
-    public String generateJwtToken(UUID userId) {
-        SecretKey secretKey = this.getSignInKey(this.jwtSecretKey);
-        return this.generate(userId.toString(), this.jwtResetExpiration, secretKey);
+    public String generateAccessToken(UUID userId) {
+        return this.generate(userId.toString(), this.accessTokenExpiration, this.getSignInKey(this.accessTokenSecretKey));
     }
 
-    private SecretKey getSignInKey(String jwtSecretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private SecretKey getSignInKey(String secretKey) {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
 
     private String generate(String subject, Long expireTime, SecretKey secretKey) {

@@ -1,7 +1,7 @@
 package ai.rupheus.application.config.security;
 
 import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.service.JwtService;
+import ai.rupheus.application.service.AccessTokenService;
 import org.springframework.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtService jwtService;
+public class AuthenticationFilter extends OncePerRequestFilter {
+    private final AccessTokenService accessTokenService;
 
     @Autowired
-    public JwtAuthenticationFilter(
-            JwtService jwtService
+    public AuthenticationFilter(
+            AccessTokenService accessTokenService
     ) {
-        this.jwtService = jwtService;
+        this.accessTokenService = accessTokenService;
     }
 
     @Override
@@ -35,13 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String jwtToken = this.getTokenFromCookie(request);
-        if (jwtToken == null || jwtToken.isEmpty()) {
+        String accessToken = this.getTokenFromCookie(request);
+        if (accessToken == null || accessToken.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Optional<UserModel> user = this.jwtService.extractUserFromJwtToken(jwtToken);
+        Optional<UserModel> user = this.accessTokenService.extractUserFromAccessToken(accessToken);
         if (user.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
@@ -65,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> "SESSION_ID".equals(cookie.getName()))
+                .filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
