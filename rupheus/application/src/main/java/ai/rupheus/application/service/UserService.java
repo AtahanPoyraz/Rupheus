@@ -29,16 +29,12 @@ public class UserService {
 
     public UserModel getUserById(UUID userId) {
         return this.userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("User not found with id: " + userId.toString())
-                );
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
     }
 
     public UserModel getUserByEmail(String email) {
         return this.userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("User not found with email: " + email)
-                );
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
     public Page<UserModel> getAllUsers(Pageable pageable) {
@@ -48,10 +44,7 @@ public class UserService {
     @Transactional
     public UserModel createUser(CreateUserRequest request) {
         this.userRepository.findByEmail(request.getEmail())
-                .ifPresent(_ -> {
-                    throw new IllegalStateException("User already exists with email: " + request.getEmail());
-                }
-        );
+                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + request.getEmail());});
 
         UserModel user = new UserModel();
         user.setFirstName(request.getFirstName());
@@ -70,9 +63,7 @@ public class UserService {
     @Transactional
     public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest request) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("User not found with id: " + userId)
-                );
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (request.getFirstName() != null) {
             user.setFirstName(request.getFirstName());
@@ -116,9 +107,7 @@ public class UserService {
     @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("User not found with id: " + userId)
-                );
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         this.userRepository.delete(user);
 

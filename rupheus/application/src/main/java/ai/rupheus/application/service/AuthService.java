@@ -29,9 +29,7 @@ public class AuthService {
     @Transactional
     public UserModel signUp(SignUpRequest request) {
         this.userRepository.findByEmail(request.getEmail())
-                .ifPresent(_ -> {
-                    throw new IllegalStateException("User already exists with email: " + request.getEmail());
-                }
+                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + request.getEmail());}
         );
 
         UserModel user = new UserModel();
@@ -51,8 +49,6 @@ public class AuthService {
     public UserModel signIn(SignInRequest request) {
         return this.userRepository.findByEmail(request.getEmail())
                 .filter(user -> this.passwordEncoder.matches(request.getPassword().trim(), user.getPassword()))
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Invalid credentials")
-                );
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 }

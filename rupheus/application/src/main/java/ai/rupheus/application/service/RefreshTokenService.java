@@ -64,9 +64,7 @@ public class RefreshTokenService {
                         DigestUtils.sha256Hex(rawToken),
                         LocalDateTime.now()
                 )
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Refresh token not found")
-                );
+                .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
     }
 
     @Transactional
@@ -90,9 +88,7 @@ public class RefreshTokenService {
 
     @Transactional
     public int cleanExpiredTokens() {
-        List<RefreshTokenModel> expired =
-                this.refreshTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
-
+        List<RefreshTokenModel> expired = this.refreshTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
         this.refreshTokenRepository.deleteAll(expired);
 
         return expired.size();
