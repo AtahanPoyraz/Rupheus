@@ -21,8 +21,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -49,16 +47,19 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<GenericResponse<?>> signUp(
-            @Valid @RequestBody SignUpRequest request,
-            @NonNull HttpServletResponse response
+            @NonNull HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SignUpRequest signUpRequest,
+            @NonNull HttpServletResponse httpServletResponse
     ) {
-        UserModel user = this.authService.signUp(request);
+        UserModel user = this.authService.signUp(signUpRequest);
 
-        String accessToken = this.accessTokenService.generateAccessToken(user.getId());
-        String refreshToken = this.refreshTokenService.generateRefreshToken(user.getId());
+        this.revokeRefreshToken(httpServletRequest);
 
-        this.setAccessCookie(accessToken, response);
-        this.setRefreshCookie(refreshToken, response);
+        String newAccessToken = this.accessTokenService.generateAccessToken(user.getId());
+        String newRefreshToken = this.refreshTokenService.generateRefreshToken(user.getId());
+
+        this.setAccessCookie(newAccessToken, httpServletResponse);
+        this.setRefreshCookie(newRefreshToken, httpServletResponse);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
@@ -72,16 +73,19 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<GenericResponse<?>> signIn(
-            @Valid @RequestBody SignInRequest request,
-            @NonNull HttpServletResponse response
+            @NonNull HttpServletRequest httpServletRequest,
+            @Valid @RequestBody SignInRequest signInRequest,
+            @NonNull HttpServletResponse httpServletResponse
     ) {
-        UserModel user = this.authService.signIn(request);
+        UserModel user = this.authService.signIn(signInRequest);
 
-        String accessToken = this.accessTokenService.generateAccessToken(user.getId());
-        String refreshToken = this.refreshTokenService.generateRefreshToken(user.getId());
+        this.revokeRefreshToken(httpServletRequest);
 
-        this.setAccessCookie(accessToken, response);
-        this.setRefreshCookie(refreshToken, response);
+        String newAccessToken = this.accessTokenService.generateAccessToken(user.getId());
+        String newRefreshToken = this.refreshTokenService.generateRefreshToken(user.getId());
+
+        this.setAccessCookie(newAccessToken, httpServletResponse);
+        this.setRefreshCookie(newRefreshToken, httpServletResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -95,10 +99,10 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<GenericResponse<?>> refresh(
-            HttpServletRequest request,
-            HttpServletResponse response
+            @NonNull HttpServletRequest httpServletRequest,
+            @NonNull HttpServletResponse httpServletResponse
     ) {
-        String refreshTokenRaw = this.getCookieValue(request, "REFRESH_TOKEN");
+        String refreshTokenRaw = this.getCookieValue(httpServletRequest, "REFRESH_TOKEN");
         if (refreshTokenRaw == null || refreshTokenRaw.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(
@@ -110,29 +114,15 @@ public class AuthController {
                     );
         }
 
-        Optional<RefreshTokenModel> storedToken =
-                this.refreshTokenService.findValidToken(refreshTokenRaw);
+        UserModel user = this.refreshTokenService.findValidToken(refreshTokenRaw).getUser();
 
-        if (storedToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Refresh token invalid or expired",
-                                    null
-                            )
-                    );
-        }
-
-        this.refreshTokenService.revokeToken(refreshTokenRaw);
-
-        UserModel user = storedToken.get().getUser();
+        this.revokeRefreshToken(httpServletRequest);
 
         String newRefreshToken = this.refreshTokenService.generateRefreshToken(user.getId());
         String newAccessToken = this.accessTokenService.generateAccessToken(user.getId());
 
-        this.setAccessCookie(newAccessToken, response);
-        this.setRefreshCookie(newRefreshToken, response);
+        this.setAccessCookie(newAccessToken, httpServletResponse);
+        this.setRefreshCookie(newRefreshToken, httpServletResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -146,16 +136,12 @@ public class AuthController {
 
     @PostMapping("/sign-out")
     public ResponseEntity<GenericResponse<?>> signOut(
-            HttpServletRequest request,
-            HttpServletResponse response
+            @NonNull HttpServletRequest httpServletRequest,
+            @NonNull HttpServletResponse httpServletResponse
     ) {
-        String refreshTokenRaw = this.getCookieValue(request, "REFRESH_TOKEN");
-        if (refreshTokenRaw != null) {
-            this.refreshTokenService.revokeToken(refreshTokenRaw);
-        }
-
-        this.clearCookie("ACCESS_TOKEN", response);
-        this.clearCookie("REFRESH_TOKEN", response);
+        this.revokeRefreshToken(httpServletRequest);
+        this.clearCookie("ACCESS_TOKEN", httpServletResponse);
+        this.clearCookie("REFRESH_TOKEN", httpServletResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -167,7 +153,14 @@ public class AuthController {
                 );
     }
 
-    private void setAccessCookie(String token, HttpServletResponse response) {
+    private void revokeRefreshToken(HttpServletRequest httpServletRequest) {
+        String refreshTokenRaw = this.getCookieValue(httpServletRequest, "REFRESH_TOKEN");
+        if (refreshTokenRaw != null && !refreshTokenRaw.isEmpty()) {
+            this.refreshTokenService.revokeToken(refreshTokenRaw);
+        }
+    }
+
+    private void setAccessCookie(String token, HttpServletResponse httpServletResponse) {
         ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", token)
                 .httpOnly(true)
                 .secure(false)
@@ -176,10 +169,10 @@ public class AuthController {
                 .maxAge(this.accessTokenExpiration / 1000)
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void setRefreshCookie(String token, HttpServletResponse response) {
+    private void setRefreshCookie(String token, HttpServletResponse httpServletResponse) {
         ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", token)
                 .httpOnly(true)
                 .secure(false)
@@ -188,10 +181,10 @@ public class AuthController {
                 .maxAge(this.refreshTokenExpiration / 1000)
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void clearCookie(String name, HttpServletResponse response) {
+    private void clearCookie(String name, HttpServletResponse httpServletResponse) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
                 .secure(false)
@@ -200,15 +193,15 @@ public class AuthController {
                 .maxAge(0)
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private String getCookieValue(HttpServletRequest request, String name) {
-        if (request.getCookies() == null) {
+    private String getCookieValue(HttpServletRequest httpServletRequest, String name) {
+        if (httpServletRequest.getCookies() == null) {
             return null;
         }
 
-        return java.util.Arrays.stream(request.getCookies())
+        return java.util.Arrays.stream(httpServletRequest.getCookies())
                 .filter(c -> c.getName().equals(name))
                 .map(Cookie::getValue)
                 .findFirst()

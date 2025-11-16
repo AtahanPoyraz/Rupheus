@@ -31,24 +31,24 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
+            @NonNull HttpServletRequest httpServletRequest,
+            @NonNull HttpServletResponse httpServletResponse,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String accessToken = this.getTokenFromCookie(request);
+        String accessToken = this.getAccessTokenFromCookies(httpServletRequest);
         if (accessToken == null || accessToken.isEmpty()) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
 
         Optional<UserModel> user = this.accessTokenService.extractUserFromAccessToken(accessToken);
         if (user.isEmpty()) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
 
         if (!user.get().isEnabled()) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;
         }
 
@@ -56,15 +56,15 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 new UsernamePasswordAuthenticationToken(user.get(), null, user.get().getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
-    private String getTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) {
+    private String getAccessTokenFromCookies(HttpServletRequest httpServletRequest) {
+        if (httpServletRequest.getCookies() == null) {
             return null;
         }
 
-        return Arrays.stream(request.getCookies())
+        return Arrays.stream(httpServletRequest.getCookies())
                 .filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)

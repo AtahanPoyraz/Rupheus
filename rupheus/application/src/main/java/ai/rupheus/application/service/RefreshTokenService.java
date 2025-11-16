@@ -6,15 +6,14 @@ import ai.rupheus.application.repository.RefreshTokenRepository;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,33 +27,25 @@ public class RefreshTokenService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public RefreshTokenService(
             UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository,
-            PasswordEncoder passwordEncoder
+            RefreshTokenRepository refreshTokenRepository
     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
     public String generateRefreshToken(UUID userId) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException("User not found with id: " + userId)
-                );
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        this.revokeAllTokensByUserId(userId);
-
-        String rawToken = generateSecureToken(this.refreshTokenByteSize);
-        String hash = this.passwordEncoder.encode(rawToken);
+        String rawToken = this.generateSecureToken(this.refreshTokenByteSize);
 
         RefreshTokenModel token = new RefreshTokenModel();
         token.setUser(user);
-        token.setTokenHash(hash);
+        token.setTokenHash(DigestUtils.sha256Hex(rawToken));
         token.setIsRevoked(false);
         token.setExpiresAt(LocalDateTime.now().plusSeconds(this.refreshTokenExpiration / 1000));
 
@@ -63,16 +54,19 @@ public class RefreshTokenService {
         return rawToken;
     }
 
-    public Optional<RefreshTokenModel> findValidToken(String rawToken) {
+    public RefreshTokenModel findValidToken(String rawToken) {
         if (rawToken == null || rawToken.isBlank()) {
-            return Optional.empty();
+            throw new EntityNotFoundException("Refresh token not found");
         }
 
-        return this.refreshTokenRepository.findAll().stream()
-                .filter(t -> !t.getIsRevoked())
-                .filter(t -> t.getExpiresAt().isAfter(LocalDateTime.now()))
-                .filter(t -> this.passwordEncoder.matches(rawToken, t.getTokenHash()))
-                .findFirst();
+        return this.refreshTokenRepository
+                .findByTokenHashAndIsRevokedFalseAndExpiresAtAfter(
+                        DigestUtils.sha256Hex(rawToken),
+                        LocalDateTime.now()
+                )
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Refresh token not found")
+                );
     }
 
     @Transactional
@@ -86,11 +80,9 @@ public class RefreshTokenService {
 
     @Transactional
     public void revokeToken(String rawToken) {
-        List<RefreshTokenModel> tokens = this.refreshTokenRepository.findAll();
-
-        tokens.stream()
-                .filter(t -> this.passwordEncoder.matches(rawToken, t.getTokenHash()))
-                .forEach(t -> {
+        this.refreshTokenRepository
+                .findByTokenHash(DigestUtils.sha256Hex(rawToken))
+                .ifPresent(t -> {
                     t.setIsRevoked(true);
                     this.refreshTokenRepository.save(t);
                 });
@@ -98,7 +90,9 @@ public class RefreshTokenService {
 
     @Transactional
     public int cleanExpiredTokens() {
-        List<RefreshTokenModel> expired = this.refreshTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
+        List<RefreshTokenModel> expired =
+                this.refreshTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
+
         this.refreshTokenRepository.deleteAll(expired);
 
         return expired.size();

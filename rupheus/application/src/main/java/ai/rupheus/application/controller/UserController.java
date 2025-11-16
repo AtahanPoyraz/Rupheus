@@ -6,9 +6,7 @@ import ai.rupheus.application.dto.user.UpdateUserByIdRequest;
 import ai.rupheus.application.dto.user.User;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.lang.NonNull;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,9 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<GenericResponse<?>> getCurrentUser(
-            @NonNull HttpServletRequest request
-    ) {
+    public ResponseEntity<GenericResponse<?>> me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -103,9 +99,9 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<GenericResponse<?>> createUser(
-            @Valid @RequestBody CreateUserRequest request
+            @Valid @RequestBody CreateUserRequest createUserRequest
     ) {
-        UserModel createdUser = this.userService.createUser(request);
+        UserModel createdUser = this.userService.createUser(createUserRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         new GenericResponse<>(
@@ -119,9 +115,9 @@ public class UserController {
     @PatchMapping("/update")
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam UUID userId,
-            @Valid @RequestBody UpdateUserByIdRequest request
+            @Valid @RequestBody UpdateUserByIdRequest updateUserRequest
     ) {
-        UserModel updatedUser = this.userService.updateUserByUserId(userId, request);
+        UserModel updatedUser = this.userService.updateUserByUserId(userId, updateUserRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(

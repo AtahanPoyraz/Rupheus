@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "Validation failed",
+                                "An validation error occurred",
                                 errors
                         )
                 );
@@ -45,8 +45,9 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.NOT_FOUND.value(),
-                                "Entity not found",
+                                "An entity not found error occurred",
                                 e.getMessage()
+
                         )
                 );
     }
@@ -59,8 +60,9 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.CONFLICT.value(),
-                                "Conflict",
+                                "An illegal state error occurred",
                                 e.getMessage()
+
                         )
                 );
     }
@@ -73,7 +75,7 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "Invalid request",
+                                "An illegal argument error occurred",
                                 e.getMessage()
                         )
                 );
@@ -87,7 +89,7 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "Invalid JSON format for one of the fields.",
+                                "An http message not readable error occurred.",
                                 e.getMessage()
                         )
                 );

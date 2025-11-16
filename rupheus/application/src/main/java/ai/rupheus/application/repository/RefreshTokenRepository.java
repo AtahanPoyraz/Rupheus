@@ -6,10 +6,17 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenModel, UUID> {
+    Optional<RefreshTokenModel> findByTokenHash(String tokenHash);
+    Optional<RefreshTokenModel> findByTokenHashAndIsRevokedFalseAndExpiresAtAfter(
+            String tokenHash,
+            LocalDateTime now
+    );
+
     List<RefreshTokenModel> findAllByUserIdAndIsRevokedFalse(UUID userId);
-    List<RefreshTokenModel> findAllByExpiresAtBefore(LocalDateTime now);
+    List<RefreshTokenModel> findAllByExpiresAtBefore(LocalDateTime time);
 }
