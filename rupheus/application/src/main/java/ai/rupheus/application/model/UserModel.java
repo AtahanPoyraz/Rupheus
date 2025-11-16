@@ -1,0 +1,108 @@
+package ai.rupheus.application.model;
+
+import ai.rupheus.application.model.enums.UserRole;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
+
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "users")
+@ToString(exclude = "password")
+public class UserModel implements UserDetails, Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "user_id", updatable = false, nullable = false, unique = true)
+    private UUID id;
+
+    @Column(name = "first_name", nullable = false, length = 64)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 64)
+    private String lastName;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "roles", nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<UserRole> roles;
+
+    @Column(name = "is_enabled", nullable = false)
+    private Boolean isEnabled;
+
+    @Column(name = "is_account_non_expired", nullable = false)
+    private Boolean isAccountNonExpired;
+
+    @Column(name = "is_account_non_locked", nullable = false)
+    private Boolean isAccountNonLocked;
+
+    @Column(name = "is_credentials_non_expired", nullable = false)
+    private Boolean isCredentialsNonExpired;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.isAccountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.isAccountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.isCredentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+}
