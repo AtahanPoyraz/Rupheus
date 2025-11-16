@@ -1,6 +1,7 @@
 package ai.rupheus.application.model;
 
 import ai.rupheus.application.model.enums.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +18,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-@ToString(exclude = "password")
 public class UserModel implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -60,11 +60,16 @@ public class UserModel implements UserDetails, Serializable {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles;
+        return this.roles
+                .stream()
+                .map(role -> (GrantedAuthority) role::name)
+                .toList();
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return this.email;

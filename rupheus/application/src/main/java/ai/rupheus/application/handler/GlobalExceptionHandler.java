@@ -44,8 +44,8 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.NOT_FOUND.value(),
-                                "Entity not found: " + e.getMessage(),
-                                null
+                                "Entity not found",
+                                e.getMessage()
                         )
                 );
     }
@@ -58,8 +58,22 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.CONFLICT.value(),
-                                "Conflict: " + e.getMessage(),
-                                null
+                                "Conflict",
+                                e.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<GenericResponse<?>> handleIllegalArgumentException(
+            IllegalArgumentException e
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Invalid request",
+                                e.getMessage()
                         )
                 );
     }

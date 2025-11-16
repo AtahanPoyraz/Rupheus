@@ -3,9 +3,13 @@ package ai.rupheus.application.controller;
 import ai.rupheus.application.dto.GenericResponse;
 import ai.rupheus.application.dto.user.CreateUserRequest;
 import ai.rupheus.application.dto.user.UpdateUserByIdRequest;
+import ai.rupheus.application.dto.user.User;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.JwtService;
 import ai.rupheus.application.service.UserService;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -70,7 +74,7 @@ public class UserController {
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "User fetched successfully",
-                                user.get()
+                                User.fromEntity(user.get())
                         )
                 );
     }
