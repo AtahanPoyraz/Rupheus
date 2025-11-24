@@ -45,8 +45,8 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.NOT_FOUND.value(),
-                                "An entity not found error occurred",
-                                e.getMessage()
+                                e.getMessage(),
+                                null
 
                         )
                 );
@@ -60,8 +60,8 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.CONFLICT.value(),
-                                "An illegal state error occurred",
-                                e.getMessage()
+                                e.getMessage(),
+                                null
 
                         )
                 );
@@ -75,8 +75,8 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "An illegal argument error occurred",
-                                e.getMessage()
+                                e.getMessage(),
+                                null
                         )
                 );
     }
@@ -89,8 +89,8 @@ public class GlobalExceptionHandler {
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.BAD_REQUEST.value(),
-                                "An http message not readable error occurred.",
-                                e.getMessage()
+                                e.getMessage(),
+                                null
                         )
                 );
     }

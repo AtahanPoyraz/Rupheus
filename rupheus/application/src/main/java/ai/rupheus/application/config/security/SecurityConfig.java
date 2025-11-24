@@ -24,8 +24,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Value("${frontend.base.url}")
-    private String frontendBaseUrl;
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,9 +35,9 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
+        configuration.setAllowedOriginPatterns(
                 List.of(
-                        this.frontendBaseUrl
+                        this.frontendUrl
                 )
         );
         configuration.setAllowedMethods(
@@ -54,6 +54,7 @@ public class SecurityConfig {
                 List.of(
                         HttpHeaders.AUTHORIZATION,
                         HttpHeaders.CONTENT_TYPE,
+                        HttpHeaders.COOKIE,
                         "X-Requested-With"
                 )
         );
@@ -84,15 +85,15 @@ public class SecurityConfig {
                         )
                         .permitAll()
                         .requestMatchers(
-                                "/api/v1/user/me"
+                                "/api/v1/user/**"
                         )
                         .authenticated()
                         .requestMatchers(
-                                "/api/v1/admin/**",
-                                "/api/v1/user/**"
+                                "/api/v1/admin/**"
                         )
                         .hasAnyRole("ADMIN")
-                        .anyRequest().denyAll()
+                        .anyRequest()
+                        .denyAll()
                 )
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

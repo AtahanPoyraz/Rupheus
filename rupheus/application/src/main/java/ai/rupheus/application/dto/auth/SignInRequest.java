@@ -11,9 +11,9 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class SignInRequest {
     @Email(message = "Please enter a valid email address")
-    @NotBlank(message = "email flag cannot be empty")
+    @NotBlank(message = "Email cannot be empty")
     private String email;
 
-    @NotBlank(message = "password flag cannot be empty")
+    @NotBlank(message = "Password cannot be empty")
     private String password;
 }

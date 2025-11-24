@@ -1,6 +1,5 @@
 package ai.rupheus.application.config.swagger;
 
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -21,7 +20,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Rupheus API Documentation")
                         .version("v1.0.0")
-                        .description("Rupheus API documentation. This API allows you to manage agents, users, authentication, and other core services.")
+                        .description("Rupheus API documentation. This API allows you to manage core services.")
                         .termsOfService("https://yourcompany.com/terms")
                         .contact(new Contact()
                                 .name("Atahan Poyraz")

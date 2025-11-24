@@ -13,12 +13,10 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
-
     @Value("${security.refresh_token.byte_size}")
     private int refreshTokenByteSize;
 
@@ -68,15 +66,6 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void revokeAllTokensByUserId(UUID userId) {
-        List<RefreshTokenModel> tokens =
-                this.refreshTokenRepository.findAllByUserIdAndIsRevokedFalse(userId);
-
-        tokens.forEach(t -> t.setIsRevoked(true));
-        this.refreshTokenRepository.saveAll(tokens);
-    }
-
-    @Transactional
     public void revokeToken(String rawToken) {
         this.refreshTokenRepository
                 .findByTokenHash(DigestUtils.sha256Hex(rawToken))
@@ -84,14 +73,6 @@ public class RefreshTokenService {
                     t.setIsRevoked(true);
                     this.refreshTokenRepository.save(t);
                 });
-    }
-
-    @Transactional
-    public int cleanExpiredTokens() {
-        List<RefreshTokenModel> expired = this.refreshTokenRepository.findAllByExpiresAtBefore(LocalDateTime.now());
-        this.refreshTokenRepository.deleteAll(expired);
-
-        return expired.size();
     }
 
     private String generateSecureToken(int byteSize) {

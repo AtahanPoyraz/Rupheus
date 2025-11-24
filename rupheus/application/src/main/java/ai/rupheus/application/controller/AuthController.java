@@ -3,7 +3,6 @@ package ai.rupheus.application.controller;
 import ai.rupheus.application.dto.GenericResponse;
 import ai.rupheus.application.dto.auth.SignInRequest;
 import ai.rupheus.application.dto.auth.SignUpRequest;
-import ai.rupheus.application.model.RefreshTokenModel;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.AccessTokenService;
 import ai.rupheus.application.service.AuthService;
