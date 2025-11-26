@@ -2,6 +2,8 @@ package ai.rupheus.application.config.security;
 
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.AccessTokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,28 +37,33 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse httpServletResponse,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String accessToken = this.getAccessTokenFromCookies(httpServletRequest);
-        if (accessToken == null || accessToken.isEmpty()) {
+        try {
+            String accessToken = this.getAccessTokenFromCookies(httpServletRequest);
+            if (accessToken == null || accessToken.isEmpty()) {
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
+                return;
+            }
+
+            Optional<UserModel> user = this.accessTokenService.extractUserFromAccessToken(accessToken);
+            if (user.isEmpty()) {
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
+                return;
+            }
+
+            if (!user.get().isEnabled()) {
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
+                return;
+            }
+
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                    new UsernamePasswordAuthenticationToken(user.get().getId(), null, user.get().getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             filterChain.doFilter(httpServletRequest, httpServletResponse);
-            return;
+        } catch (Exception e) {
+            logger.warn("Access token parsing FAILED in AuthenticationFilter: " + e.getMessage(), e);
+            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-
-        Optional<UserModel> user = this.accessTokenService.extractUserFromAccessToken(accessToken);
-        if (user.isEmpty()) {
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
-            return;
-        }
-
-        if (!user.get().isEnabled()) {
-            filterChain.doFilter(httpServletRequest, httpServletResponse);
-            return;
-        }
-
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                new UsernamePasswordAuthenticationToken(user.get(), null, user.get().getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
     private String getAccessTokenFromCookies(HttpServletRequest httpServletRequest) {

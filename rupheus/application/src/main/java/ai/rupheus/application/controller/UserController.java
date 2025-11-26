@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -73,7 +74,7 @@ public class UserController {
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "User updated successfully",
-                                User.fromEntity(fetchedUser.get())
+                                User.fromEntity(updatedUser)
                         )
                 );
     }
@@ -111,14 +112,10 @@ public class UserController {
         }
 
         Object principal = authentication.getPrincipal();
-        if (principal instanceof String && principal.equals("anonymousUser")) {
-            return Optional.empty();
+        if (principal instanceof UUID userId) {
+            return Optional.of(this.userService.getUserById(userId));
         }
 
-        if (!(principal instanceof UserModel)) {
-            return Optional.empty();
-        }
-
-        return Optional.of((UserModel) principal);
+        return Optional.empty();
     }
 }
