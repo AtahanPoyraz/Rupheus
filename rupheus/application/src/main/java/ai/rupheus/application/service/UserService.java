@@ -1,6 +1,6 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.dto.user.UpdateUserByIdRequest;
+import ai.rupheus.application.dto.user.UpdateUserRequest;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,7 +26,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest request) {
+    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest request) {
         UserModel user = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 

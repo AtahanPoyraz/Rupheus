@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateUserByIdRequest {
+public class UpdateUserRequest {
     @NotBlank(message = "First name cannot be empty")
     private String firstName;
 

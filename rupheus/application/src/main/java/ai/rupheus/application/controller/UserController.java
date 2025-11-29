@@ -1,11 +1,13 @@
 package ai.rupheus.application.controller;
 
 import ai.rupheus.application.dto.GenericResponse;
-import ai.rupheus.application.dto.user.UpdateUserByIdRequest;
+import ai.rupheus.application.dto.user.UpdateUserRequest;
 import ai.rupheus.application.dto.user.User;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +56,7 @@ public class UserController {
 
     @PatchMapping("/update")
     public ResponseEntity<GenericResponse<?>> updateUser(
-            @Valid @RequestBody UpdateUserByIdRequest updateUserRequest
+            @Valid @RequestBody UpdateUserRequest updateUserRequest
     ) {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
         if (fetchedUser.isEmpty()) {
