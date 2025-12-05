@@ -1,23 +1,28 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.dto.user.UpdateUserRequest;
+import ai.rupheus.application.dto.user.UpdatePasswordByIdRequest;
+import ai.rupheus.application.dto.user.UpdateUserDetailsByIdRequest;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(
-            UserRepository userRepository
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserModel getUserById(UUID userId) {
@@ -26,31 +31,45 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest request) {
-        UserModel user = this.userRepository.findById(userId)
+    public UserModel updateUserDetailsById(UUID userId, UpdateUserDetailsByIdRequest updateUserDetailsRequest) {
+        UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+        if (updateUserDetailsRequest.getFirstName() != null) {
+            updatedUser.setFirstName(updateUserDetailsRequest.getFirstName());
         }
 
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+        if (updateUserDetailsRequest.getLastName() != null) {
+            updatedUser.setLastName(updateUserDetailsRequest.getLastName());
         }
 
-        return this.userRepository.save(user);
+        return this.userRepository.save(updatedUser);
+    }
+
+    @Transactional
+    public UserModel updatePasswordById(UUID userId, UpdatePasswordByIdRequest updatePasswordRequest) {
+        UserModel updatedUser = this.userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        if (!this.passwordEncoder.matches(updatePasswordRequest.getPassword(), updatedUser.getPassword())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        updatedUser.setPassword(this.passwordEncoder.encode(updatePasswordRequest.getNewPassword()));
+
+        return this.userRepository.save(updatedUser);
     }
 
     @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
-        UserModel user = this.userRepository.findById(userId)
+        UserModel deletedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        user.setIsEnabled(false);
-        user.setIsAccountNonExpired(false);
-        user.setIsAccountNonLocked(false);
-        user.setIsCredentialsNonExpired(false);
+        deletedUser.setIsEnabled(false);
+        deletedUser.setIsAccountNonExpired(false);
+        deletedUser.setIsAccountNonLocked(false);
+        deletedUser.setIsCredentialsNonExpired(false);
 
-        return this.userRepository.save(user);
+        return this.userRepository.save(deletedUser);
     }
 }

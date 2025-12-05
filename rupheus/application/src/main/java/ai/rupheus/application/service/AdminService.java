@@ -2,7 +2,9 @@ package ai.rupheus.application.service;
 
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateUserByIdRequest;
+import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -12,19 +14,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class AdminService {
     private final UserRepository userRepository;
+    private final TargetRepository targetRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AdminService(
             UserRepository userRepository,
+            TargetRepository targetRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
+        this.targetRepository = targetRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -43,75 +49,88 @@ public class AdminService {
     }
 
     @Transactional
-    public UserModel createUser(CreateUserRequest request) {
-        this.userRepository.findByEmail(request.getEmail())
-                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + request.getEmail());});
+    public UserModel createUser(CreateUserRequest createUserRequest) {
+        this.userRepository.findByEmail(createUserRequest.getEmail())
+                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + createUserRequest.getEmail());});
 
-        UserModel user = new UserModel();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPassword(this.passwordEncoder.encode(request.getPassword()));
-        user.setIsEnabled(request.getIsEnabled());
-        user.setIsAccountNonExpired(request.getIsAccountNonExpired());
-        user.setIsAccountNonLocked(request.getIsAccountNonLocked());
-        user.setIsCredentialsNonExpired(request.getIsCredentialsNonExpired());
-        user.setRoles(request.getRoles());
+        UserModel createdUser = new UserModel();
+        createdUser.setFirstName(createUserRequest.getFirstName());
+        createdUser.setLastName(createUserRequest.getLastName());
+        createdUser.setEmail(createUserRequest.getEmail());
+        createdUser.setPassword(this.passwordEncoder.encode(createUserRequest.getPassword()));
+        createdUser.setIsEnabled(createUserRequest.getIsEnabled());
+        createdUser.setIsAccountNonExpired(createUserRequest.getIsAccountNonExpired());
+        createdUser.setIsAccountNonLocked(createUserRequest.getIsAccountNonLocked());
+        createdUser.setIsCredentialsNonExpired(createUserRequest.getIsCredentialsNonExpired());
+        createdUser.setRoles(createUserRequest.getRoles());
 
-        return this.userRepository.save(user);
+        return this.userRepository.save(createdUser);
     }
 
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest request) {
-        UserModel user = this.userRepository.findById(userId)
+    public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest updateUserByIdRequest) {
+        UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+        if (updateUserByIdRequest.getFirstName() != null) {
+            updatedUser.setFirstName(updateUserByIdRequest.getFirstName());
         }
 
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+        if (updateUserByIdRequest.getLastName() != null) {
+            updatedUser.setLastName(updateUserByIdRequest.getLastName());
         }
 
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
+        if (updateUserByIdRequest.getEmail() != null) {
+            updatedUser.setEmail(updateUserByIdRequest.getEmail());
         }
 
-        if (request.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (updateUserByIdRequest.getPassword() != null) {
+            updatedUser.setPassword(passwordEncoder.encode(updateUserByIdRequest.getPassword()));
         }
 
-        if (request.getIsEnabled() != null) {
-            user.setIsEnabled(request.getIsEnabled());
+        if (updateUserByIdRequest.getIsEnabled() != null) {
+            updatedUser.setIsEnabled(updateUserByIdRequest.getIsEnabled());
         }
 
-        if (request.getIsAccountNonExpired() != null) {
-            user.setIsAccountNonExpired(request.getIsAccountNonExpired());
+        if (updateUserByIdRequest.getIsAccountNonExpired() != null) {
+            updatedUser.setIsAccountNonExpired(updateUserByIdRequest.getIsAccountNonExpired());
         }
 
-        if (request.getIsAccountNonLocked() != null) {
-            user.setIsAccountNonLocked(request.getIsAccountNonLocked());
+        if (updateUserByIdRequest.getIsAccountNonLocked() != null) {
+            updatedUser.setIsAccountNonLocked(updateUserByIdRequest.getIsAccountNonLocked());
         }
 
-        if (request.getIsCredentialsNonExpired() != null) {
-            user.setIsCredentialsNonExpired(request.getIsCredentialsNonExpired());
+        if (updateUserByIdRequest.getIsCredentialsNonExpired() != null) {
+            updatedUser.setIsCredentialsNonExpired(updateUserByIdRequest.getIsCredentialsNonExpired());
         }
 
-        if (request.getRoles() != null) {
-            user.setRoles(request.getRoles());
+        if (updateUserByIdRequest.getRoles() != null) {
+            updatedUser.setRoles(updateUserByIdRequest.getRoles());
         }
 
-        return this.userRepository.save(user);
+        return this.userRepository.save(updatedUser);
     }
 
     @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
-        UserModel user = this.userRepository.findById(userId)
+        UserModel deletedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        this.userRepository.delete(user);
+        this.userRepository.delete(deletedUser);
 
-        return user;
+        return deletedUser;
+    }
+
+    public TargetModel getTargetById(UUID targetId) {
+        return this.targetRepository.findById(targetId)
+                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+    }
+
+    public List<TargetModel> getTargetByUserId(UUID userId) {
+        return this.targetRepository.findAllByUser_Id(userId);
+    }
+
+    public Page<TargetModel> getAllTargets(Pageable pageable) {
+        return this.targetRepository.findAll(pageable);
     }
 }

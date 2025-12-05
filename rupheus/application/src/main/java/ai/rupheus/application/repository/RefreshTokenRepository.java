@@ -16,7 +16,4 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenModel,
             String tokenHash,
             LocalDateTime now
     );
-
-    List<RefreshTokenModel> findAllByUserIdAndIsRevokedFalse(UUID userId);
-    List<RefreshTokenModel> findAllByExpiresAtBefore(LocalDateTime time);
 }

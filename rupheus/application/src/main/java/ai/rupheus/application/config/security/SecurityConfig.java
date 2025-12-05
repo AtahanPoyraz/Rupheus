@@ -44,7 +44,8 @@ public class SecurityConfig {
                         HttpMethod.POST.name(),
                         HttpMethod.PATCH.name(),
                         HttpMethod.DELETE.name(),
-                        HttpMethod.PATCH.name()
+                        HttpMethod.PATCH.name(),
+                        HttpMethod.OPTIONS.name()
                 )
         );
         configuration.setAllowedHeaders(
@@ -73,7 +74,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(
+                        authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                         .requestMatchers(
                                 "/actuator/health",
                                 "/swagger-ui/**",
@@ -82,7 +84,8 @@ public class SecurityConfig {
                         )
                         .permitAll()
                         .requestMatchers(
-                                "/api/v1/user/**"
+                                "/api/v1/user/**",
+                                "api/v1/target/**"
                         )
                         .authenticated()
                         .requestMatchers(

@@ -27,28 +27,28 @@ public class AuthService {
     }
 
     @Transactional
-    public UserModel signUp(SignUpRequest request) {
-        this.userRepository.findByEmail(request.getEmail())
-                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + request.getEmail());}
+    public UserModel signUp(SignUpRequest signUpRequest) {
+        this.userRepository.findByEmail(signUpRequest.getEmail())
+                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + signUpRequest.getEmail());}
         );
 
-        UserModel user = new UserModel();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setPassword(this.passwordEncoder.encode(request.getPassword()));
-        user.setIsEnabled(true);
-        user.setIsAccountNonExpired(true);
-        user.setIsAccountNonLocked(true);
-        user.setIsCredentialsNonExpired(true);
-        user.setRoles(EnumSet.of(UserRole.ROLE_USER));
+        UserModel signedUpUser = new UserModel();
+        signedUpUser.setFirstName(signUpRequest.getFirstName());
+        signedUpUser.setLastName(signUpRequest.getLastName());
+        signedUpUser.setEmail(signUpRequest.getEmail());
+        signedUpUser.setPassword(this.passwordEncoder.encode(signUpRequest.getPassword()));
+        signedUpUser.setIsEnabled(true);
+        signedUpUser.setIsAccountNonExpired(true);
+        signedUpUser.setIsAccountNonLocked(true);
+        signedUpUser.setIsCredentialsNonExpired(true);
+        signedUpUser.setRoles(EnumSet.of(UserRole.ROLE_USER));
 
-        return this.userRepository.save(user);
+        return this.userRepository.save(signedUpUser);
     }
 
-    public UserModel signIn(SignInRequest request) {
-        return this.userRepository.findByEmail(request.getEmail())
-                .filter(user -> this.passwordEncoder.matches(request.getPassword().trim(), user.getPassword()))
+    public UserModel signIn(SignInRequest signInRequest) {
+        return this.userRepository.findByEmail(signInRequest.getEmail())
+                .filter(signedInUser -> this.passwordEncoder.matches(signInRequest.getPassword().trim(), signedInUser.getPassword()))
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 }

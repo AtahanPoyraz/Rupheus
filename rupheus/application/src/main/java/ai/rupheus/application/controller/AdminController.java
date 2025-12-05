@@ -3,6 +3,7 @@ package ai.rupheus.application.controller;
 import ai.rupheus.application.dto.GenericResponse;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateUserByIdRequest;
+import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.AdminService;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,7 +30,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @GetMapping("/get")
+    @GetMapping("/user/get")
     public ResponseEntity<GenericResponse<?>> getUser(
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String email,
@@ -69,7 +71,7 @@ public class AdminController {
                 );
     }
 
-    @PostMapping("/create")
+    @PostMapping("/user/create")
     public ResponseEntity<GenericResponse<?>> createUser(
             @Valid @RequestBody CreateUserRequest createUserRequest
     ) {
@@ -84,7 +86,7 @@ public class AdminController {
                 );
     }
 
-    @PatchMapping("/update")
+    @PatchMapping("/user/update")
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam UUID userId,
             @Valid @RequestBody UpdateUserByIdRequest updateUserRequest
@@ -100,7 +102,7 @@ public class AdminController {
                 );
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/user/delete")
     public ResponseEntity<GenericResponse<?>> deleteUser(
             @RequestParam UUID userId
     ) {
@@ -112,6 +114,47 @@ public class AdminController {
                                 "User deleted successfully",
                                 deletedUser
 
+                        )
+                );
+    }
+
+    @GetMapping("/target/get")
+    public ResponseEntity<GenericResponse<?>> getTarget(
+            @RequestParam(required = false) UUID targetId,
+            @RequestParam(required = false) UUID userId,
+            @ParameterObject Pageable pageable
+    ) {
+        if (targetId != null) {
+            TargetModel fetchedTarget = this.adminService.getTargetById(targetId);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.OK.value(),
+                                    "Target fetched successfully",
+                                    fetchedTarget
+                            )
+                    );
+        }
+
+        if (userId != null) {
+            List<TargetModel> fetchedTarget = this.adminService.getTargetByUserId(userId);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.OK.value(),
+                                    "Target fetched successfully",
+                                    fetchedTarget
+                            )
+                    );
+        }
+
+        Page<TargetModel> fetchedTargets = this.adminService.getAllTargets(pageable);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.OK.value(),
+                                "Targets fetched successfully",
+                                fetchedTargets
                         )
                 );
     }

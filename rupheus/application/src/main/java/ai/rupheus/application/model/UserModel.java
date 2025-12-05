@@ -2,6 +2,7 @@ package ai.rupheus.application.model;
 
 import ai.rupheus.application.model.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,9 +36,15 @@ public class UserModel implements UserDetails, Serializable {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "roles", nullable = false)
+    @Column(
+            name = "roles",
+            nullable = false
+    )
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
 
@@ -66,6 +73,15 @@ public class UserModel implements UserDetails, Serializable {
             orphanRemoval = true
     )
     private List<RefreshTokenModel> refreshTokens = new ArrayList<>();
+
+    @JsonManagedReference
+    @OneToMany(
+            mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<TargetModel> targets = new ArrayList<>();
 
     @JsonIgnore
     @Override
