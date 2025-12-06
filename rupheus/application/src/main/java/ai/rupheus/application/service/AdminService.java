@@ -37,7 +37,7 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserModel getUserById(UUID userId) {
+    public UserModel getUserByUserId(UUID userId) {
         return this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
     }
@@ -115,17 +115,7 @@ public class AdminService {
     }
 
     @Transactional
-    public UserModel deleteUserByUserId(UUID userId) {
-        UserModel deletedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-        this.userRepository.delete(deletedUser);
-
-        return deletedUser;
-    }
-
-    @Transactional
-    public List<UserModel> bulkDeleteUserByIds(List<UUID> userIds) {
+    public List<UserModel> deleteUserByUserIds(List<UUID> userIds) {
 
         List<UserModel> users = this.userRepository.findAllById(userIds);
 
@@ -138,7 +128,7 @@ public class AdminService {
         return users;
     }
 
-    public TargetModel getTargetById(UUID targetId) {
+    public TargetModel getTargetByTargetId(UUID targetId) {
         return this.targetRepository.findById(targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
     }
@@ -187,17 +177,7 @@ public class AdminService {
     }
 
     @Transactional
-    public TargetModel deleteTargetById(UUID targetId) {
-        TargetModel deletedTarget = this.targetRepository.findById(targetId)
-                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
-
-        this.targetRepository.delete(deletedTarget);
-
-        return deletedTarget;
-    }
-
-    @Transactional
-    public List<TargetModel> bulkDeleteTargetByIds(List<UUID> targetIds) {
+    public List<TargetModel> deleteTargetByTargetIds(List<UUID> targetIds) {
         List<TargetModel> targets = this.targetRepository.findAllById(targetIds);
 
         if (targets.isEmpty()) {

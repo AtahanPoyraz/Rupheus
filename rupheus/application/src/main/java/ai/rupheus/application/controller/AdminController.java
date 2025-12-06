@@ -40,7 +40,7 @@ public class AdminController {
             @ParameterObject Pageable pageable
     ) {
         if (userId != null) {
-            UserModel fetchedUser = this.adminService.getUserById(userId);
+            UserModel fetchedUser = this.adminService.getUserByUserId(userId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -109,7 +109,7 @@ public class AdminController {
     public ResponseEntity<GenericResponse<?>> deleteUser(
             @RequestParam List<UUID> userIds
     ) {
-        List<UserModel> deletedUsers = this.adminService.bulkDeleteUserByIds(userIds);
+        List<UserModel> deletedUsers = this.adminService.deleteUserByUserIds(userIds);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -128,7 +128,7 @@ public class AdminController {
             @ParameterObject Pageable pageable
     ) {
         if (targetId != null) {
-            TargetModel fetchedTarget = this.adminService.getTargetById(targetId);
+            TargetModel fetchedTarget = this.adminService.getTargetByTargetId(targetId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -198,7 +198,7 @@ public class AdminController {
     public ResponseEntity<GenericResponse<?>> deleteTarget(
             @RequestParam List<UUID> targetIds
     ) {
-        List<TargetModel> deletedTargets = this.adminService.bulkDeleteTargetByIds(targetIds);
+        List<TargetModel> deletedTargets = this.adminService.deleteTargetByTargetIds(targetIds);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(

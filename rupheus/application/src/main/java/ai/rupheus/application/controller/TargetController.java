@@ -55,7 +55,7 @@ public class TargetController {
         }
 
         if (targetId != null) {
-            TargetModel fetchedTarget = this.targetService.getTargetById(fetchedUser.get().getId(), targetId);
+            TargetModel fetchedTarget = this.targetService.getTargetByTargetId(fetchedUser.get().getId(), targetId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -122,7 +122,7 @@ public class TargetController {
                     );
         }
 
-        TargetModel updatedTarget = this.targetService.updateTargetId(fetchedUser.get().getId(), targetId, updateTargetRequest);
+        TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.get().getId(), targetId, updateTargetRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -149,7 +149,7 @@ public class TargetController {
                     );
         }
 
-        List<TargetModel> deletedTarget = this.targetService.bulkDeleteTargetByIds(fetchedUser.get().getId(), targetIds);
+        List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.get().getId(), targetIds);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -168,7 +168,7 @@ public class TargetController {
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof UUID userId) {
-            return Optional.of(this.userService.getUserById(userId));
+            return Optional.of(this.userService.getUserByUserId(userId));
         }
 
         return Optional.empty();

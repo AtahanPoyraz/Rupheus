@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<GenericResponse<?>> me() {
+    public ResponseEntity<GenericResponse<?>> getUser() {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
         if (fetchedUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -79,7 +79,7 @@ public class UserController {
             UpdateUserDetailsByIdRequest updateUserDetailsByIdRequest =
                     objectMapper.convertValue(updateRequest, UpdateUserDetailsByIdRequest.class);
 
-            UserModel updatedUser = userService.updateUserDetailsById(fetchedUser.get().getId(), updateUserDetailsByIdRequest);
+            UserModel updatedUser = userService.updateUserDetailsByUserId(fetchedUser.get().getId(), updateUserDetailsByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -94,7 +94,7 @@ public class UserController {
             UpdatePasswordByIdRequest updatePasswordByIdRequest =
                     objectMapper.convertValue(updateRequest, UpdatePasswordByIdRequest.class);
 
-            UserModel updatedUser = userService.updatePasswordById(fetchedUser.get().getId(), updatePasswordByIdRequest);
+            UserModel updatedUser = userService.updatePasswordByUserId(fetchedUser.get().getId(), updatePasswordByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -149,7 +149,7 @@ public class UserController {
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof UUID userId) {
-            return Optional.of(this.userService.getUserById(userId));
+            return Optional.of(this.userService.getUserByUserId(userId));
         }
 
         return Optional.empty();

@@ -25,13 +25,13 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserModel getUserById(UUID userId) {
+    public UserModel getUserByUserId(UUID userId) {
         return this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
     }
 
     @Transactional
-    public UserModel updateUserDetailsById(UUID userId, UpdateUserDetailsByIdRequest updateUserDetailsRequest) {
+    public UserModel updateUserDetailsByUserId(UUID userId, UpdateUserDetailsByIdRequest updateUserDetailsRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
@@ -47,7 +47,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updatePasswordById(UUID userId, UpdatePasswordByIdRequest updatePasswordRequest) {
+    public UserModel updatePasswordByUserId(UUID userId, UpdatePasswordByIdRequest updatePasswordRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
