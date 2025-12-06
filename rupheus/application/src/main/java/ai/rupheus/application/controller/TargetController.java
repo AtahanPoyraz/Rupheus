@@ -37,7 +37,7 @@ public class TargetController {
         this.userService = userService;
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ResponseEntity<GenericResponse<?>> getTarget(
             @RequestParam(required = false) UUID targetId,
             @ParameterObject Pageable pageable
@@ -77,7 +77,7 @@ public class TargetController {
                 );
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<GenericResponse<?>> createTarget(
             @RequestParam ConnectionScheme connectionScheme,
             @Valid @RequestBody CreateTargetRequest createTargetRequest
@@ -105,7 +105,7 @@ public class TargetController {
                 );
     }
 
-    @PatchMapping("/update")
+    @PatchMapping
     public ResponseEntity<GenericResponse<?>> updateTarget(
             @RequestParam UUID targetId,
             @Valid @RequestBody UpdateTargetRequest updateTargetRequest
@@ -133,35 +133,8 @@ public class TargetController {
                 );
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<GenericResponse<?>> deleteTarget(
-            @RequestParam UUID targetId
-    ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
-        TargetModel deletedTarget = this.targetService.deleteTargetById(fetchedUser.get().getId(), targetId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Target deleted successfully",
-                                deletedTarget
-                        )
-                );
-    }
-
-    @DeleteMapping("/bulk-delete")
-    public ResponseEntity<GenericResponse<?>> bulkDeleteTarget(
             @RequestParam List<UUID> targetIds
     ) {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();

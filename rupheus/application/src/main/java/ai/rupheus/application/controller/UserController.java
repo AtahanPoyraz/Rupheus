@@ -6,7 +6,8 @@ import ai.rupheus.application.dto.user.UpdateUserDetailsByIdRequest;
 import ai.rupheus.application.dto.user.User;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.UserService;
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,15 +23,18 @@ import java.util.UUID;
 @RequestMapping("/api/v1/user")
 public class UserController {
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public UserController(
-            UserService userService
+            UserService userService,
+            ObjectMapper objectMapper
     ) {
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
-    @GetMapping("/get")
+    @GetMapping
     public ResponseEntity<GenericResponse<?>> me() {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
         if (fetchedUser.isEmpty()) {
@@ -53,9 +58,10 @@ public class UserController {
                 );
     }
 
-    @PatchMapping("/update-details")
-    public ResponseEntity<GenericResponse<?>> updateDetails(
-            @Valid @RequestBody UpdateUserDetailsByIdRequest updateUserRequest
+    @PatchMapping
+    public ResponseEntity<GenericResponse<?>> updateUser(
+            @RequestParam @Pattern(regexp = "details|password", message = "Invalid sectionType") String sectionType,
+            @RequestBody  Map<String, Object> updateRequest
     ) {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
         if (fetchedUser.isEmpty()) {
@@ -69,45 +75,47 @@ public class UserController {
                     );
         }
 
-        UserModel updatedUser = this.userService.updateUserDetailsById(fetchedUser.get().getId(), updateUserRequest);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "User updated successfully",
-                                User.fromEntity(updatedUser)
-                        )
-                );
-    }
+        if (sectionType.equals("details")) {
+            UpdateUserDetailsByIdRequest updateUserDetailsByIdRequest =
+                    objectMapper.convertValue(updateRequest, UpdateUserDetailsByIdRequest.class);
 
-    @PatchMapping("/update-password")
-    public ResponseEntity<GenericResponse<?>> updatePassword(
-            @Valid @RequestBody UpdatePasswordByIdRequest updatePasswordRequest
-    ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            UserModel updatedUser = userService.updateUserDetailsById(fetchedUser.get().getId(), updateUserDetailsByIdRequest);
+            return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
+                                    HttpStatus.OK.value(),
+                                    "User updated successfully",
+                                    User.fromEntity(updatedUser)
                             )
                     );
         }
 
-        UserModel updatedUser = this.userService.updatePasswordById(fetchedUser.get().getId(), updatePasswordRequest);
-        return ResponseEntity.status(HttpStatus.OK)
+        if (sectionType.equals("password")) {
+            UpdatePasswordByIdRequest updatePasswordByIdRequest =
+                    objectMapper.convertValue(updateRequest, UpdatePasswordByIdRequest.class);
+
+            UserModel updatedUser = userService.updatePasswordById(fetchedUser.get().getId(), updatePasswordByIdRequest);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.OK.value(),
+                                    "User updated successfully",
+                                    User.fromEntity(updatedUser)
+                            )
+                    );
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(
                         new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Password updated successfully",
-                                User.fromEntity(updatedUser)
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Section type is invalid",
+                                null
                         )
                 );
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<GenericResponse<?>> deleteUser() {
         Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
         if (fetchedUser.isEmpty()) {

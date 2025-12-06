@@ -33,7 +33,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @GetMapping("/user/get")
+    @GetMapping("/user")
     public ResponseEntity<GenericResponse<?>> getUser(
             @RequestParam(required = false) UUID userId,
             @RequestParam(required = false) String email,
@@ -74,7 +74,7 @@ public class AdminController {
                 );
     }
 
-    @PostMapping("/user/create")
+    @PostMapping("/user")
     public ResponseEntity<GenericResponse<?>> createUser(
             @Valid @RequestBody CreateUserRequest createUserRequest
     ) {
@@ -89,7 +89,7 @@ public class AdminController {
                 );
     }
 
-    @PatchMapping("/user/update")
+    @PatchMapping("/user")
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam UUID userId,
             @Valid @RequestBody UpdateUserRequest updateUserRequest
@@ -105,24 +105,8 @@ public class AdminController {
                 );
     }
 
-    @DeleteMapping("/user/delete")
+    @DeleteMapping("/user")
     public ResponseEntity<GenericResponse<?>> deleteUser(
-            @RequestParam UUID userId
-    ) {
-        UserModel deletedUser = this.adminService.deleteUserByUserId(userId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "User deleted successfully",
-                                deletedUser
-
-                        )
-                );
-    }
-
-    @DeleteMapping("/user/bulk-delete")
-    public ResponseEntity<GenericResponse<?>> bulkDeleteUser(
             @RequestParam List<UUID> userIds
     ) {
         List<UserModel> deletedUsers = this.adminService.bulkDeleteUserByIds(userIds);
@@ -137,7 +121,7 @@ public class AdminController {
                 );
     }
 
-    @GetMapping("/target/get")
+    @GetMapping("/target")
     public ResponseEntity<GenericResponse<?>> getTarget(
             @RequestParam(required = false) UUID targetId,
             @RequestParam(required = false) UUID userId,
@@ -178,7 +162,7 @@ public class AdminController {
                 );
     }
 
-    @PostMapping("/target/create")
+    @PostMapping("/target")
     public ResponseEntity<GenericResponse<?>> createTarget(
             @RequestParam ConnectionScheme connectionScheme,
             @Valid @RequestBody CreateTargetRequest createTargetRequest
@@ -194,7 +178,7 @@ public class AdminController {
                 );
     }
 
-    @PatchMapping("/target/update")
+    @PatchMapping("/target")
     public ResponseEntity<GenericResponse<?>> updateTarget(
             @RequestParam UUID targetId,
             @Valid @RequestBody UpdateTargetRequest updateTargetRequest
@@ -210,23 +194,8 @@ public class AdminController {
                 );
     }
 
-    @DeleteMapping("/target/delete")
+    @DeleteMapping("/target")
     public ResponseEntity<GenericResponse<?>> deleteTarget(
-            @RequestParam UUID targetId
-    ) {
-        TargetModel deletedTarget = this.adminService.deleteTargetById(targetId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Target deleted successfully",
-                                deletedTarget
-                        )
-                );
-    }
-
-    @DeleteMapping("/target/bulk-delete")
-    public ResponseEntity<GenericResponse<?>> bulkDeleteTarget(
             @RequestParam List<UUID> targetIds
     ) {
         List<TargetModel> deletedTargets = this.adminService.bulkDeleteTargetByIds(targetIds);

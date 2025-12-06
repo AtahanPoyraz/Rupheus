@@ -2,6 +2,7 @@ package ai.rupheus.application.handler;
 
 import ai.rupheus.application.dto.GenericResponse;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -84,6 +85,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<GenericResponse<?>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException e
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.BAD_REQUEST.value(),
+                                e.getMessage(),
+                                null
+                        )
+                );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<GenericResponse<?>> handleDataIntegrityViolationException(
+            DataIntegrityViolationException e
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(
