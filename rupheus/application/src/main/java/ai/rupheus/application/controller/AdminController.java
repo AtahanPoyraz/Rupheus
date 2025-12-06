@@ -1,10 +1,13 @@
 package ai.rupheus.application.controller;
 
 import ai.rupheus.application.dto.GenericResponse;
+import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
-import ai.rupheus.application.dto.admin.UpdateUserByIdRequest;
+import ai.rupheus.application.dto.admin.UpdateTargetRequest;
+import ai.rupheus.application.dto.admin.UpdateUserRequest;
 import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.enums.ConnectionScheme;
 import ai.rupheus.application.service.AdminService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -89,7 +92,7 @@ public class AdminController {
     @PatchMapping("/user/update")
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam UUID userId,
-            @Valid @RequestBody UpdateUserByIdRequest updateUserRequest
+            @Valid @RequestBody UpdateUserRequest updateUserRequest
     ) {
         UserModel updatedUser = this.adminService.updateUserByUserId(userId, updateUserRequest);
         return ResponseEntity.status(HttpStatus.OK)
@@ -113,6 +116,22 @@ public class AdminController {
                                 HttpStatus.OK.value(),
                                 "User deleted successfully",
                                 deletedUser
+
+                        )
+                );
+    }
+
+    @DeleteMapping("/user/bulk-delete")
+    public ResponseEntity<GenericResponse<?>> bulkDeleteUser(
+            @RequestParam List<UUID> userIds
+    ) {
+        List<UserModel> deletedUsers = this.adminService.bulkDeleteUserByIds(userIds);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.OK.value(),
+                                "Users deleted successfully",
+                                deletedUsers
 
                         )
                 );
@@ -155,6 +174,68 @@ public class AdminController {
                                 HttpStatus.OK.value(),
                                 "Targets fetched successfully",
                                 fetchedTargets
+                        )
+                );
+    }
+
+    @PostMapping("/target/create")
+    public ResponseEntity<GenericResponse<?>> createTarget(
+            @RequestParam ConnectionScheme connectionScheme,
+            @Valid @RequestBody CreateTargetRequest createTargetRequest
+    ) {
+        TargetModel createdTarget = this.adminService.createTarget(connectionScheme, createTargetRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.CREATED.value(),
+                                "Targets created successfully",
+                                createdTarget
+                        )
+                );
+    }
+
+    @PatchMapping("/target/update")
+    public ResponseEntity<GenericResponse<?>> updateTarget(
+            @RequestParam UUID targetId,
+            @Valid @RequestBody UpdateTargetRequest updateTargetRequest
+    ) {
+        TargetModel updatedTarget = this.adminService.updateTargetByTargetId(targetId, updateTargetRequest);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.OK.value(),
+                                "Targets updated successfully",
+                                updatedTarget
+                        )
+                );
+    }
+
+    @DeleteMapping("/target/delete")
+    public ResponseEntity<GenericResponse<?>> deleteTarget(
+            @RequestParam UUID targetId
+    ) {
+        TargetModel deletedTarget = this.adminService.deleteTargetById(targetId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.OK.value(),
+                                "Target deleted successfully",
+                                deletedTarget
+                        )
+                );
+    }
+
+    @DeleteMapping("/target/bulk-delete")
+    public ResponseEntity<GenericResponse<?>> bulkDeleteTarget(
+            @RequestParam List<UUID> targetIds
+    ) {
+        List<TargetModel> deletedTargets = this.adminService.bulkDeleteTargetByIds(targetIds);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        new GenericResponse<>(
+                                HttpStatus.OK.value(),
+                                "Targets deleted successfully",
+                                deletedTargets
                         )
                 );
     }

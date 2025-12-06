@@ -13,7 +13,7 @@ import java.util.EnumSet;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateUserByIdRequest {
+public class UpdateUserRequest {
     private String firstName;
 
     private String lastName;

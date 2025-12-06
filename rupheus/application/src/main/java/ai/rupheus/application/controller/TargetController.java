@@ -55,7 +55,7 @@ public class TargetController {
         }
 
         if (targetId != null) {
-            TargetModel fetchedTarget = this.targetService.getTargetById(targetId);
+            TargetModel fetchedTarget = this.targetService.getTargetById(fetchedUser.get().getId(), targetId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -110,7 +110,19 @@ public class TargetController {
             @RequestParam UUID targetId,
             @Valid @RequestBody UpdateTargetRequest updateTargetRequest
     ) {
-        TargetModel updatedTarget = this.targetService.updateTargetId(targetId, updateTargetRequest);
+        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
+        if (fetchedUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.UNAUTHORIZED.value(),
+                                    "Credentials are invalid",
+                                    null
+                            )
+                    );
+        }
+
+        TargetModel updatedTarget = this.targetService.updateTargetId(fetchedUser.get().getId(), targetId, updateTargetRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -125,7 +137,19 @@ public class TargetController {
     public ResponseEntity<GenericResponse<?>> deleteTarget(
             @RequestParam UUID targetId
     ) {
-        TargetModel deletedTarget = this.targetService.deleteTargetById(targetId);
+        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
+        if (fetchedUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.UNAUTHORIZED.value(),
+                                    "Credentials are invalid",
+                                    null
+                            )
+                    );
+        }
+
+        TargetModel deletedTarget = this.targetService.deleteTargetById(fetchedUser.get().getId(), targetId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -140,7 +164,19 @@ public class TargetController {
     public ResponseEntity<GenericResponse<?>> bulkDeleteTarget(
             @RequestParam List<UUID> targetIds
     ) {
-        List<TargetModel> deletedTarget = this.targetService.bulkDeleteTargetByIds(targetIds);
+        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
+        if (fetchedUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            new GenericResponse<>(
+                                    HttpStatus.UNAUTHORIZED.value(),
+                                    "Credentials are invalid",
+                                    null
+                            )
+                    );
+        }
+
+        List<TargetModel> deletedTarget = this.targetService.bulkDeleteTargetByIds(fetchedUser.get().getId(), targetIds);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(

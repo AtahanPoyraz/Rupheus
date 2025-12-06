@@ -1,9 +1,12 @@
 package ai.rupheus.application.service;
 
+import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
-import ai.rupheus.application.dto.admin.UpdateUserByIdRequest;
+import ai.rupheus.application.dto.admin.UpdateTargetRequest;
+import ai.rupheus.application.dto.admin.UpdateUserRequest;
 import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.enums.ConnectionScheme;
 import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -68,7 +71,7 @@ public class AdminService {
     }
 
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserByIdRequest updateUserByIdRequest) {
+    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserByIdRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
@@ -121,6 +124,20 @@ public class AdminService {
         return deletedUser;
     }
 
+    @Transactional
+    public List<UserModel> bulkDeleteUserByIds(List<UUID> userIds) {
+
+        List<UserModel> users = this.userRepository.findAllById(userIds);
+
+        if (users.isEmpty()) {
+            throw new EntityNotFoundException("No users found for provided IDs: " + userIds.toString());
+        }
+
+        this.userRepository.deleteAllInBatch(users);
+
+        return users;
+    }
+
     public TargetModel getTargetById(UUID targetId) {
         return this.targetRepository.findById(targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
@@ -132,5 +149,63 @@ public class AdminService {
 
     public Page<TargetModel> getAllTargets(Pageable pageable) {
         return this.targetRepository.findAll(pageable);
+    }
+
+    @Transactional
+    public TargetModel createTarget(ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
+        UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
+
+        TargetModel createdTarget = new TargetModel();
+        createdTarget.setName(createTargetRequest.getTargetName());
+        createdTarget.setDescription(createTargetRequest.getTargetDescription());
+        createdTarget.setConfig(createTargetRequest.getConfig());
+        createdTarget.setScheme(connectionScheme);
+        createdTarget.setUser(user);
+
+        return this.targetRepository.save(createdTarget);
+    }
+
+    @Transactional
+    public TargetModel updateTargetByTargetId(UUID targetId, UpdateTargetRequest updateTargetRequest) {
+        TargetModel updatedTarget = this.targetRepository.findById(targetId)
+                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+
+        if (updateTargetRequest.getTargetName() != null) {
+            updatedTarget.setName(updateTargetRequest.getTargetName());
+        }
+
+        if (updateTargetRequest.getTargetDescription() != null) {
+            updatedTarget.setDescription(updateTargetRequest.getTargetDescription());
+        }
+
+        if (updateTargetRequest.getConfig() != null) {
+            updatedTarget.setConfig(updateTargetRequest.getConfig());
+        }
+
+        return this.targetRepository.save(updatedTarget);
+    }
+
+    @Transactional
+    public TargetModel deleteTargetById(UUID targetId) {
+        TargetModel deletedTarget = this.targetRepository.findById(targetId)
+                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+
+        this.targetRepository.delete(deletedTarget);
+
+        return deletedTarget;
+    }
+
+    @Transactional
+    public List<TargetModel> bulkDeleteTargetByIds(List<UUID> targetIds) {
+        List<TargetModel> targets = this.targetRepository.findAllById(targetIds);
+
+        if (targets.isEmpty()) {
+            throw new EntityNotFoundException("No targets found for provided IDs: " + targetIds);
+        }
+
+        this.targetRepository.deleteAllInBatch(targets);
+
+        return targets;
     }
 }

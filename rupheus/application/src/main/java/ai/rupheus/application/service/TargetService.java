@@ -30,8 +30,8 @@ public class TargetService {
         this.providerUrlResolver = providerUrlResolver;
     }
 
-    public TargetModel getTargetById(UUID targetId) {
-        return this.targetRepository.findById(targetId)
+    public TargetModel getTargetById(UUID userId, UUID targetId) {
+        return this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
     }
 
@@ -42,24 +42,24 @@ public class TargetService {
     @Transactional
     public TargetModel createTarget(UserModel user, ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
         TargetModel createdTarget = new TargetModel();
-        createdTarget.setName(createdTarget.getName());
-        createdTarget.setDescription(createdTarget.getDescription());
+        createdTarget.setName(createTargetRequest.getTargetName());
+        createdTarget.setDescription(createTargetRequest.getTargetDescription());
+        createdTarget.setScheme(connectionScheme);
         createdTarget.setUser(user);
-
-        return new TargetModel();
+        return this.targetRepository.save(createdTarget);
     }
 
     @Transactional
-    public TargetModel updateTargetId(UUID targetId, UpdateTargetRequest updateTargetRequest) {
-        TargetModel updatedTarget = this.targetRepository.findById(targetId)
+    public TargetModel updateTargetId(UUID userId, UUID targetId, UpdateTargetRequest updateTargetRequest) {
+        TargetModel updatedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
 
         return this.targetRepository.save(updatedTarget);
     }
 
     @Transactional
-    public TargetModel deleteTargetById(UUID targetId) {
-        TargetModel deletedTarget = this.targetRepository.findById(targetId)
+    public TargetModel deleteTargetById(UUID userId, UUID targetId) {
+        TargetModel deletedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
 
         this.targetRepository.delete(deletedTarget);
@@ -68,9 +68,8 @@ public class TargetService {
     }
 
     @Transactional
-    public List<TargetModel> bulkDeleteTargetByIds(List<UUID> targetIds) {
-
-        List<TargetModel> targets = this.targetRepository.findAllById(targetIds);
+    public List<TargetModel> bulkDeleteTargetByIds(UUID userId, List<UUID> targetIds) {
+        List<TargetModel> targets = this.targetRepository.findAllByUser_IdAndIdIn(userId, targetIds);
 
         if (targets.isEmpty()) {
             throw new EntityNotFoundException("No targets found for provided IDs: " + targetIds);
