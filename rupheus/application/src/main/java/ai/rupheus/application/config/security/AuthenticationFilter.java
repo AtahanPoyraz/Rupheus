@@ -1,9 +1,8 @@
 package ai.rupheus.application.config.security;
 
+import ai.rupheus.application.config.logger.ApplicationLogger;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.service.AccessTokenService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,12 +22,15 @@ import java.util.Optional;
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
     private final AccessTokenService accessTokenService;
+    private final ApplicationLogger applicationLogger;
 
     @Autowired
     public AuthenticationFilter(
-            AccessTokenService accessTokenService
+            AccessTokenService accessTokenService,
+            ApplicationLogger applicationLogger
     ) {
         this.accessTokenService = accessTokenService;
+        this.applicationLogger = applicationLogger;
     }
 
     @Override
@@ -61,7 +63,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         } catch (Exception e) {
-            logger.warn("Access token parsing FAILED in AuthenticationFilter: " + e.getMessage(), e);
+            this.applicationLogger.warn(AuthenticationFilter.class, "Access token parsing FAILED in AuthenticationFilter: " + e.getMessage());
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
