@@ -5,19 +5,13 @@ import ai.rupheus.application.dto.target.UpdateTargetRequest;
 import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.model.enums.ConnectionScheme;
-import ai.rupheus.application.model.pojos.ClaudeConfig;
-import ai.rupheus.application.model.pojos.HuggingFaceConfig;
-import ai.rupheus.application.model.pojos.OpenAIConfig;
-import ai.rupheus.application.model.pojos.RestConfig;
 import ai.rupheus.application.repository.TargetRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /* TODO
@@ -30,15 +24,12 @@ import java.util.UUID;
 @Service
 public class TargetService {
     private final TargetRepository targetRepository;
-    private final ObjectMapper objectMapper;
 
     @Autowired
     public TargetService(
-            TargetRepository targetRepository,
-            ObjectMapper objectMapper
+            TargetRepository targetRepository
     ) {
         this.targetRepository = targetRepository;
-        this.objectMapper = objectMapper;
     }
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
@@ -82,5 +73,4 @@ public class TargetService {
         return targets;
     }
 
-    private void ValidateParams() {}
 }
