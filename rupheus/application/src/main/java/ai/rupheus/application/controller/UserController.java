@@ -11,12 +11,13 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -36,24 +37,13 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<GenericResponse<?>> getUser() {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
+        UserModel fetchedUser = this.getUserFromSecurityContext();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "User fetched successfully",
-                                User.fromEntity(fetchedUser.get())
+                                User.fromEntity(fetchedUser)
                         )
                 );
     }
@@ -63,23 +53,12 @@ public class UserController {
             @RequestParam @Pattern(regexp = "details|password", message = "Invalid sectionType") String sectionType,
             @RequestBody  Map<String, Object> updateRequest
     ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
+        UserModel fetchedUser = this.getUserFromSecurityContext();
         if (sectionType.equals("details")) {
             UpdateUserDetailsByIdRequest updateUserDetailsByIdRequest =
                     objectMapper.convertValue(updateRequest, UpdateUserDetailsByIdRequest.class);
 
-            UserModel updatedUser = userService.updateUserDetailsByUserId(fetchedUser.get().getId(), updateUserDetailsByIdRequest);
+            UserModel updatedUser = userService.updateUserDetailsByUserId(fetchedUser.getId(), updateUserDetailsByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -94,7 +73,7 @@ public class UserController {
             UpdatePasswordByIdRequest updatePasswordByIdRequest =
                     objectMapper.convertValue(updateRequest, UpdatePasswordByIdRequest.class);
 
-            UserModel updatedUser = userService.updatePasswordByUserId(fetchedUser.get().getId(), updatePasswordByIdRequest);
+            UserModel updatedUser = userService.updatePasswordByUserId(fetchedUser.getId(), updatePasswordByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -117,19 +96,8 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<GenericResponse<?>> deleteUser() {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
-        UserModel deletedUser = this.userService.deleteUserByUserId(fetchedUser.get().getId());
+        UserModel fetchedUser = this.getUserFromSecurityContext();
+        UserModel deletedUser = this.userService.deleteUserByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -141,17 +109,17 @@ public class UserController {
                 );
     }
 
-    private Optional<UserModel> getUserFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return Optional.empty();
+    private UserModel getUserFromSecurityContext() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
         }
 
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UUID userId) {
-            return Optional.of(this.userService.getUserByUserId(userId));
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof UUID userId)) {
+            throw new BadCredentialsException("Invalid principal");
         }
 
-        return Optional.empty();
+        return userService.getUserByUserId(userId);
     }
 }

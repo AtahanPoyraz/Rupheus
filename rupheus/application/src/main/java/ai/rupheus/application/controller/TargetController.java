@@ -14,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -42,20 +43,9 @@ public class TargetController {
             @RequestParam(required = false) UUID targetId,
             @ParameterObject Pageable pageable
     ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
+        UserModel fetchedUser = this.getUserFromSecurityContext();
         if (targetId != null) {
-            TargetModel fetchedTarget = this.targetService.getTargetByTargetId(fetchedUser.get().getId(), targetId);
+            TargetModel fetchedTarget = this.targetService.getTargetByTargetId(fetchedUser.getId(), targetId);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(
                             new GenericResponse<>(
@@ -66,7 +56,7 @@ public class TargetController {
                     );
         }
 
-        List<TargetModel> fetchedTarget = this.targetService.getTargetByUserId(fetchedUser.get().getId());
+        List<TargetModel> fetchedTarget = this.targetService.getTargetByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -82,19 +72,8 @@ public class TargetController {
             @RequestParam ConnectionScheme connectionScheme,
             @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
-        TargetModel createdTarget = this.targetService.createTarget(fetchedUser.get(), connectionScheme, createTargetRequest);
+        UserModel fetchedUser = this.getUserFromSecurityContext();
+        TargetModel createdTarget = this.targetService.createTarget(fetchedUser, connectionScheme, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         new GenericResponse<>(
@@ -110,19 +89,8 @@ public class TargetController {
             @RequestParam UUID targetId,
             @Valid @RequestBody UpdateTargetRequest updateTargetRequest
     ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
-        TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.get().getId(), targetId, updateTargetRequest);
+        UserModel fetchedUser = this.getUserFromSecurityContext();
+        TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.getId(), targetId, updateTargetRequest);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -137,19 +105,8 @@ public class TargetController {
     public ResponseEntity<GenericResponse<?>> deleteTarget(
             @RequestParam List<UUID> targetIds
     ) {
-        Optional<UserModel> fetchedUser = this.getUserFromSecurityContext();
-        if (fetchedUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "Credentials are invalid",
-                                    null
-                            )
-                    );
-        }
-
-        List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.get().getId(), targetIds);
+        UserModel fetchedUser = this.getUserFromSecurityContext();
+        List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.getId(), targetIds);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
@@ -160,17 +117,17 @@ public class TargetController {
                 );
     }
 
-    private Optional<UserModel> getUserFromSecurityContext() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return Optional.empty();
+    private UserModel getUserFromSecurityContext() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
         }
 
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UUID userId) {
-            return Optional.of(this.userService.getUserByUserId(userId));
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof UUID userId)) {
+            throw new BadCredentialsException("Invalid principal");
         }
 
-        return Optional.empty();
+        return userService.getUserByUserId(userId);
     }
 }
