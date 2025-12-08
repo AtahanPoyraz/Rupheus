@@ -9,15 +9,19 @@ import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.model.enums.ConnectionScheme;
 import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.Validator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -25,16 +29,22 @@ public class AdminService {
     private final UserRepository userRepository;
     private final TargetRepository targetRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Autowired
     public AdminService(
             UserRepository userRepository,
             TargetRepository targetRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            ObjectMapper objectMapper,
+            Validator validator
     ) {
         this.userRepository = userRepository;
         this.targetRepository = targetRepository;
         this.passwordEncoder = passwordEncoder;
+        this.objectMapper = objectMapper;
+        this.validator = validator;
     }
 
     public UserModel getUserByUserId(UUID userId) {
@@ -146,10 +156,16 @@ public class AdminService {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
+        Object config = this.objectMapper.convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+
+        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
+
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setConfig(createTargetRequest.getConfig());
         createdTarget.setScheme(connectionScheme);
         createdTarget.setUser(user);
 
@@ -160,6 +176,13 @@ public class AdminService {
     public TargetModel updateTargetByTargetId(UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findById(targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+
+        Object config = this.objectMapper.convertValue(updateTargetRequest.getConfig(), updatedTarget.getConfig().getClass());
+
+        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
 
         if (updateTargetRequest.getTargetName() != null) {
             updatedTarget.setName(updateTargetRequest.getTargetName());

@@ -6,30 +6,33 @@ import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
 import ai.rupheus.application.model.enums.ConnectionScheme;
 import ai.rupheus.application.repository.TargetRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.validation.Validator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-
-/* TODO
-* CREATE' DE CONFIG ICIN BELIRLI SCHEMELERE VALIDE OLMASI LAZIM ONUN VALIDAYSONU FIELD VALIDASYONU
-*
-
-*/
-
 
 @Service
 public class TargetService {
     private final TargetRepository targetRepository;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Autowired
     public TargetService(
-            TargetRepository targetRepository
+            TargetRepository targetRepository,
+            ObjectMapper objectMapper,
+            Validator validator
     ) {
         this.targetRepository = targetRepository;
+        this.objectMapper = objectMapper;
+        this.validator = validator;
     }
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
@@ -43,19 +46,34 @@ public class TargetService {
 
     @Transactional
     public TargetModel createTarget(UserModel user, ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
+        Object config = this.objectMapper.convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+
+        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
+
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
         createdTarget.setScheme(connectionScheme);
         createdTarget.setConfig(createTargetRequest.getConfig());
         createdTarget.setUser(user);
-        return this.targetRepository.save(createdTarget);
+
+        return targetRepository.save(createdTarget);
     }
 
     @Transactional
     public TargetModel updateTargetByTargetId(UUID userId, UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+
+        Object config = this.objectMapper.convertValue(updateTargetRequest.getConfig(), updatedTarget.getConfig().getClass());
+
+        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
 
         return this.targetRepository.save(updatedTarget);
     }
@@ -72,5 +90,4 @@ public class TargetService {
 
         return targets;
     }
-
 }
