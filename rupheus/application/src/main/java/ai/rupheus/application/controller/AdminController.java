@@ -92,7 +92,7 @@ public class AdminController {
     @PatchMapping("/user")
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam UUID userId,
-            @Valid @RequestBody UpdateUserRequest updateUserRequest
+            @RequestBody UpdateUserRequest updateUserRequest
     ) {
         UserModel updatedUser = this.adminService.updateUserByUserId(userId, updateUserRequest);
         return ResponseEntity.status(HttpStatus.OK)
@@ -181,7 +181,7 @@ public class AdminController {
     @PatchMapping("/target")
     public ResponseEntity<GenericResponse<?>> updateTarget(
             @RequestParam UUID targetId,
-            @Valid @RequestBody UpdateTargetRequest updateTargetRequest
+            @RequestBody UpdateTargetRequest updateTargetRequest
     ) {
         TargetModel updatedTarget = this.adminService.updateTargetByTargetId(targetId, updateTargetRequest);
         return ResponseEntity.status(HttpStatus.OK)

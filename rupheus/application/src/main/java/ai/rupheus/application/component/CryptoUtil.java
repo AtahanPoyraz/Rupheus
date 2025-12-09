@@ -17,12 +17,12 @@ public class CryptoUtil {
     private String masterKey;
 
     private SecretKeySpec keySpec;
-    private static final String AES_TRANSFORMATION = "AES/CBC/PKCS5Padding";
     private final SecureRandom secureRandom = new SecureRandom();
+    private static final String AES_TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
     @PostConstruct
     private void init() {
-        byte[] keyBytes = this.masterKey.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = Base64.getDecoder().decode(this.masterKey);
 
         if (keyBytes.length != 32) {
             throw new IllegalArgumentException("Master key must be exactly 32 bytes for AES-256.");
@@ -34,7 +34,7 @@ public class CryptoUtil {
     public String encrypt(String plainText) {
         try {
             byte[] iv = new byte[16];
-            secureRandom.nextBytes(iv);
+            this.secureRandom.nextBytes(iv);
 
             Cipher cipher = Cipher.getInstance(AES_TRANSFORMATION);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec, new IvParameterSpec(iv));

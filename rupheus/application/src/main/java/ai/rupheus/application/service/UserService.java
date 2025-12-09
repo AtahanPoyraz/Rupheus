@@ -35,11 +35,11 @@ public class UserService {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        if (updateUserDetailsRequest.getFirstName() != null) {
+        if (updateUserDetailsRequest.getFirstName() != null && !updateUserDetailsRequest.getFirstName().isEmpty()) {
             updatedUser.setFirstName(updateUserDetailsRequest.getFirstName());
         }
 
-        if (updateUserDetailsRequest.getLastName() != null) {
+        if (updateUserDetailsRequest.getLastName() != null && !updateUserDetailsRequest.getLastName().isEmpty()) {
             updatedUser.setLastName(updateUserDetailsRequest.getLastName());
         }
 

@@ -1,6 +1,5 @@
 package ai.rupheus.application.dto.admin;
 
-import ai.rupheus.application.model.enums.TargetStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

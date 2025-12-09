@@ -69,12 +69,12 @@ public class TargetService {
     public TargetModel updateTargetByTargetId(UUID userId, UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
-        
-        if (updateTargetRequest.getTargetName() != null) {
+
+        if (updateTargetRequest.getTargetName() != null && !updateTargetRequest.getTargetName().isEmpty()) {
             updatedTarget.setName(updateTargetRequest.getTargetName());
         }
 
-        if (updateTargetRequest.getTargetDescription() != null) {
+        if (updateTargetRequest.getTargetDescription() != null && !updateTargetRequest.getTargetDescription().isEmpty()) {
             updatedTarget.setDescription(updateTargetRequest.getTargetDescription());
         }
 

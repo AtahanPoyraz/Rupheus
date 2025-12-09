@@ -27,14 +27,9 @@ public class UpdateUserRequest {
             message = "Password must contain at least one letter, one number, and one special character"
     )
     private String password;
-
     private Boolean isEnabled;
-
     private Boolean isAccountNonExpired;
-
     private Boolean isAccountNonLocked;
-
     private Boolean isCredentialsNonExpired;
-
     private EnumSet<UserRole> roles;
 }

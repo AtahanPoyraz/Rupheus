@@ -1,6 +1,5 @@
 package ai.rupheus.application.dto.user;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,9 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateUserDetailsByIdRequest {
-    @NotBlank(message = "First name cannot be empty")
     private String firstName;
-
-    @NotBlank(message = "Last name cannot be empty")
     private String lastName;
 }

@@ -90,19 +90,19 @@ public class AdminService {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        if (updateUserRequest.getFirstName() != null) {
+        if (updateUserRequest.getFirstName() != null && !updateUserRequest.getFirstName().isEmpty()) {
             updatedUser.setFirstName(updateUserRequest.getFirstName());
         }
 
-        if (updateUserRequest.getLastName() != null) {
+        if (updateUserRequest.getLastName() != null && !updateUserRequest.getLastName().isEmpty()) {
             updatedUser.setLastName(updateUserRequest.getLastName());
         }
 
-        if (updateUserRequest.getEmail() != null) {
+        if (updateUserRequest.getEmail() != null && !updateUserRequest.getEmail().isEmpty()) {
             updatedUser.setEmail(updateUserRequest.getEmail());
         }
 
-        if (updateUserRequest.getPassword() != null) {
+        if (updateUserRequest.getPassword() != null && !updateUserRequest.getPassword().isEmpty()) {
             updatedUser.setPassword(this.passwordEncoder.encode(updateUserRequest.getPassword()));
         }
 
@@ -186,11 +186,11 @@ public class AdminService {
             throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
         }
 
-        if (updateTargetRequest.getTargetName() != null) {
+        if (updateTargetRequest.getTargetName() != null && !updateTargetRequest.getTargetName().isEmpty()) {
             updatedTarget.setName(updateTargetRequest.getTargetName());
         }
 
-        if (updateTargetRequest.getTargetDescription() != null) {
+        if (updateTargetRequest.getTargetDescription() != null && !updateTargetRequest.getTargetDescription().isEmpty()) {
             updatedTarget.setDescription(updateTargetRequest.getTargetDescription());
         }
 

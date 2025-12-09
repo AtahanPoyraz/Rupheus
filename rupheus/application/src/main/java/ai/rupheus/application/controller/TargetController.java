@@ -2,6 +2,7 @@ package ai.rupheus.application.controller;
 
 import ai.rupheus.application.dto.GenericResponse;
 import ai.rupheus.application.dto.target.CreateTargetRequest;
+import ai.rupheus.application.dto.target.Target;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
 import ai.rupheus.application.model.TargetModel;
 import ai.rupheus.application.model.UserModel;
@@ -51,7 +52,7 @@ public class TargetController {
                             new GenericResponse<>(
                                     HttpStatus.OK.value(),
                                     "Target fetched successfully",
-                                    fetchedTarget
+                                    Target.fromEntity(fetchedTarget)
                             )
                     );
         }
@@ -62,7 +63,7 @@ public class TargetController {
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "Target fetched successfully",
-                                fetchedTarget
+                                Target.fromEntity(fetchedTarget)
                         )
                 );
     }
@@ -79,7 +80,7 @@ public class TargetController {
                         new GenericResponse<>(
                                 HttpStatus.CREATED.value(),
                                 "Target created successfully",
-                                createdTarget
+                                Target.fromEntity(createdTarget)
                         )
                 );
     }
@@ -87,7 +88,7 @@ public class TargetController {
     @PatchMapping
     public ResponseEntity<GenericResponse<?>> updateTarget(
             @RequestParam UUID targetId,
-            @Valid @RequestBody UpdateTargetRequest updateTargetRequest
+            @RequestBody UpdateTargetRequest updateTargetRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.getId(), targetId, updateTargetRequest);
@@ -96,7 +97,7 @@ public class TargetController {
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "Target updated successfully",
-                                updatedTarget
+                                Target.fromEntity(updatedTarget)
                         )
                 );
     }
@@ -112,7 +113,7 @@ public class TargetController {
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
                                 "Target deleted successfully",
-                                deletedTarget
+                                Target.fromEntity(deletedTarget)
                         )
                 );
     }

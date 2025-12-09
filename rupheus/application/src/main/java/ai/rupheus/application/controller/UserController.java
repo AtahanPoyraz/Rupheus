@@ -51,7 +51,7 @@ public class UserController {
     @PatchMapping
     public ResponseEntity<GenericResponse<?>> updateUser(
             @RequestParam @Pattern(regexp = "details|password", message = "Invalid sectionType") String sectionType,
-            @RequestBody  Map<String, Object> updateRequest
+            @RequestBody Map<String, Object> updateRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         if (sectionType.equals("details")) {
