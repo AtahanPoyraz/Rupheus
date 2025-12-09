@@ -1,5 +1,6 @@
 package ai.rupheus.application.service;
 
+import ai.rupheus.application.component.CryptoUtil;
 import ai.rupheus.application.dto.target.CreateTargetRequest;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
 import ai.rupheus.application.model.TargetModel;
@@ -14,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.Validator;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,16 +26,19 @@ public class TargetService {
     private final TargetRepository targetRepository;
     private final ObjectMapper objectMapper;
     private final Validator validator;
+    private final CryptoUtil cryptoUtil;
 
     @Autowired
     public TargetService(
             TargetRepository targetRepository,
             ObjectMapper objectMapper,
-            Validator validator
+            Validator validator,
+            CryptoUtil cryptoUtil
     ) {
         this.targetRepository = targetRepository;
         this.objectMapper = objectMapper;
         this.validator = validator;
+        this.cryptoUtil = cryptoUtil;
     }
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
@@ -46,12 +52,8 @@ public class TargetService {
 
     @Transactional
     public TargetModel createTarget(UserModel user, ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
-        Object config = this.objectMapper.convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
-
-        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
-        }
+        this.validateConfig(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+        this.encryptField(createTargetRequest.getConfig(), "apiKey");
 
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
@@ -67,12 +69,20 @@ public class TargetService {
     public TargetModel updateTargetByTargetId(UUID userId, UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+        
+        if (updateTargetRequest.getTargetName() != null) {
+            updatedTarget.setName(updateTargetRequest.getTargetName());
+        }
 
-        Object config = this.objectMapper.convertValue(updateTargetRequest.getConfig(), updatedTarget.getConfig().getClass());
+        if (updateTargetRequest.getTargetDescription() != null) {
+            updatedTarget.setDescription(updateTargetRequest.getTargetDescription());
+        }
 
-        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        if (updateTargetRequest.getConfig() != null) {
+            this.validateConfig(updateTargetRequest.getConfig(), updatedTarget.getScheme().getConfigClass());
+            this.encryptField(updateTargetRequest.getConfig(), "apiKey");
+
+            updatedTarget.setConfig(updateTargetRequest.getConfig());
         }
 
         return this.targetRepository.save(updatedTarget);
@@ -89,5 +99,26 @@ public class TargetService {
         this.targetRepository.deleteAllInBatch(targets);
 
         return targets;
+    }
+
+    private void validateConfig(Object config, Class<?> target) {
+        Object configObject = this.objectMapper.convertValue(config, target);
+        Set<ConstraintViolation<Object>> violations = validator.validate(configObject);
+
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
+    }
+
+    private void encryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.cryptoUtil.encrypt(config.get(field).toString()));
+        }
+    }
+
+    private void decryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.cryptoUtil.decrypt(config.get(field).toString()));
+        }
     }
 }

@@ -1,5 +1,6 @@
 package ai.rupheus.application.service;
 
+import ai.rupheus.application.component.CryptoUtil;
 import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateTargetRequest;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.validation.Validator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +33,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
     private final Validator validator;
+    private final CryptoUtil cryptoUtil;
 
     @Autowired
     public AdminService(
@@ -38,13 +41,15 @@ public class AdminService {
             TargetRepository targetRepository,
             PasswordEncoder passwordEncoder,
             ObjectMapper objectMapper,
-            Validator validator
+            Validator validator,
+            CryptoUtil cryptoUtil
     ) {
         this.userRepository = userRepository;
         this.targetRepository = targetRepository;
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
         this.validator = validator;
+        this.cryptoUtil = cryptoUtil;
     }
 
     public UserModel getUserByUserId(UUID userId) {
@@ -81,44 +86,44 @@ public class AdminService {
     }
 
     @Transactional
-    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserByIdRequest) {
+    public UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        if (updateUserByIdRequest.getFirstName() != null) {
-            updatedUser.setFirstName(updateUserByIdRequest.getFirstName());
+        if (updateUserRequest.getFirstName() != null) {
+            updatedUser.setFirstName(updateUserRequest.getFirstName());
         }
 
-        if (updateUserByIdRequest.getLastName() != null) {
-            updatedUser.setLastName(updateUserByIdRequest.getLastName());
+        if (updateUserRequest.getLastName() != null) {
+            updatedUser.setLastName(updateUserRequest.getLastName());
         }
 
-        if (updateUserByIdRequest.getEmail() != null) {
-            updatedUser.setEmail(updateUserByIdRequest.getEmail());
+        if (updateUserRequest.getEmail() != null) {
+            updatedUser.setEmail(updateUserRequest.getEmail());
         }
 
-        if (updateUserByIdRequest.getPassword() != null) {
-            updatedUser.setPassword(passwordEncoder.encode(updateUserByIdRequest.getPassword()));
+        if (updateUserRequest.getPassword() != null) {
+            updatedUser.setPassword(this.passwordEncoder.encode(updateUserRequest.getPassword()));
         }
 
-        if (updateUserByIdRequest.getIsEnabled() != null) {
-            updatedUser.setIsEnabled(updateUserByIdRequest.getIsEnabled());
+        if (updateUserRequest.getIsEnabled() != null) {
+            updatedUser.setIsEnabled(updateUserRequest.getIsEnabled());
         }
 
-        if (updateUserByIdRequest.getIsAccountNonExpired() != null) {
-            updatedUser.setIsAccountNonExpired(updateUserByIdRequest.getIsAccountNonExpired());
+        if (updateUserRequest.getIsAccountNonExpired() != null) {
+            updatedUser.setIsAccountNonExpired(updateUserRequest.getIsAccountNonExpired());
         }
 
-        if (updateUserByIdRequest.getIsAccountNonLocked() != null) {
-            updatedUser.setIsAccountNonLocked(updateUserByIdRequest.getIsAccountNonLocked());
+        if (updateUserRequest.getIsAccountNonLocked() != null) {
+            updatedUser.setIsAccountNonLocked(updateUserRequest.getIsAccountNonLocked());
         }
 
-        if (updateUserByIdRequest.getIsCredentialsNonExpired() != null) {
-            updatedUser.setIsCredentialsNonExpired(updateUserByIdRequest.getIsCredentialsNonExpired());
+        if (updateUserRequest.getIsCredentialsNonExpired() != null) {
+            updatedUser.setIsCredentialsNonExpired(updateUserRequest.getIsCredentialsNonExpired());
         }
 
-        if (updateUserByIdRequest.getRoles() != null) {
-            updatedUser.setRoles(updateUserByIdRequest.getRoles());
+        if (updateUserRequest.getRoles() != null) {
+            updatedUser.setRoles(updateUserRequest.getRoles());
         }
 
         return this.userRepository.save(updatedUser);
@@ -156,17 +161,14 @@ public class AdminService {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
-        Object config = this.objectMapper.convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
-
-        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
-        }
+        this.validateConfig(createTargetRequest.getConfig(),connectionScheme.getConfigClass());
+        this.encryptField(createTargetRequest.getConfig(), "apiKey");
 
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
         createdTarget.setScheme(connectionScheme);
+        createdTarget.setConfig(createTargetRequest.getConfig());
         createdTarget.setUser(user);
 
         return this.targetRepository.save(createdTarget);
@@ -193,6 +195,9 @@ public class AdminService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
+            this.validateConfig(updateTargetRequest.getConfig(), updatedTarget.getScheme().getConfigClass());
+            this.encryptField(updateTargetRequest.getConfig(), "apiKey");
+
             updatedTarget.setConfig(updateTargetRequest.getConfig());
         }
 
@@ -202,13 +207,32 @@ public class AdminService {
     @Transactional
     public List<TargetModel> deleteTargetByTargetIds(List<UUID> targetIds) {
         List<TargetModel> targets = this.targetRepository.findAllById(targetIds);
-
         if (targets.isEmpty()) {
             throw new EntityNotFoundException("No targets found for provided IDs: " + targetIds);
         }
 
         this.targetRepository.deleteAllInBatch(targets);
-
         return targets;
+    }
+
+    private void validateConfig(Object config, Class<?> target) {
+        Object configObject = this.objectMapper.convertValue(config, target);
+        Set<ConstraintViolation<Object>> violations = validator.validate(configObject);
+
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
+        }
+    }
+
+    private void encryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.cryptoUtil.encrypt(config.get(field).toString()));
+        }
+    }
+
+    private void decryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.cryptoUtil.decrypt(config.get(field).toString()));
+        }
     }
 }
