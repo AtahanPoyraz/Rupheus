@@ -58,7 +58,7 @@ public class TargetService {
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setScheme(connectionScheme);
+        createdTarget.setConnectionScheme(connectionScheme);
         createdTarget.setConfig(createTargetRequest.getConfig());
         createdTarget.setUser(user);
 
@@ -79,7 +79,7 @@ public class TargetService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            this.validateConfig(updateTargetRequest.getConfig(), updatedTarget.getScheme().getConfigClass());
+            this.validateConfig(updateTargetRequest.getConfig(), updatedTarget.getConnectionScheme().getConfigClass());
             this.encryptField(updateTargetRequest.getConfig(), "apiKey");
 
             updatedTarget.setConfig(updateTargetRequest.getConfig());

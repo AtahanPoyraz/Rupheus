@@ -40,7 +40,7 @@ public class TargetModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "scheme", nullable = false)
-    private ConnectionScheme scheme;
+    private ConnectionScheme connectionScheme;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "config", columnDefinition = "jsonb")

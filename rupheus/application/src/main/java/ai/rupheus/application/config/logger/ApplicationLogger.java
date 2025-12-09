@@ -6,27 +6,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationLogger {
-    public Logger getLogger(Class<?> clazz) {
-        return LoggerFactory.getLogger(clazz);
+    public Logger getLogger(Class<?> source) {
+        return LoggerFactory.getLogger(source);
     }
 
-    public void info(Class<?> clazz, String message) {
-        getLogger(clazz).info(message);
+    public void info(Class<?> source, String message) {
+        getLogger(source).info(message);
     }
 
-    public void warn(Class<?> clazz, String message) {
-        getLogger(clazz).warn(message);
+    public void warn(Class<?> source, String message) {
+        getLogger(source).warn(message);
     }
 
-    public void error(Class<?> clazz, String message) {
-        getLogger(clazz).error(message);
+    public void error(Class<?> source, String message) {
+        getLogger(source).error(message);
     }
 
-    public void error(Class<?> clazz, String message, Throwable throwable) {
-        getLogger(clazz).error(message, throwable);
+    public void error(Class<?> source, String message, Throwable throwable) {
+        getLogger(source).error(message, throwable);
     }
 
-    public void debug(Class<?> clazz, String message) {
-        getLogger(clazz).debug(message);
+    public void debug(Class<?> source, String message) {
+        getLogger(source).debug(message);
     }
 }

@@ -1,6 +1,8 @@
 package ai.rupheus.application.component;
 
+import ai.rupheus.application.config.logger.ApplicationLogger;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +22,21 @@ public class CryptoUtil {
     private final SecureRandom secureRandom = new SecureRandom();
     private static final String AES_TRANSFORMATION = "AES/CBC/PKCS5Padding";
 
+    private final ApplicationLogger applicationLogger;
+
+    @Autowired
+    public CryptoUtil(
+            ApplicationLogger applicationLogger
+    ) {
+        this.applicationLogger = applicationLogger;
+    }
+
     @PostConstruct
     private void init() {
         byte[] keyBytes = Base64.getDecoder().decode(this.masterKey);
 
         if (keyBytes.length != 32) {
+            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while initializing crypto util");
             throw new IllegalArgumentException("Master key must be exactly 32 bytes for AES-256.");
         }
 
@@ -47,6 +59,7 @@ public class CryptoUtil {
 
             return Base64.getEncoder().encodeToString(combined);
         } catch (Exception e) {
+            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while encrypting plain text: " + e.getMessage());
             throw new IllegalStateException("Encryption failed", e);
         }
     }
@@ -66,6 +79,7 @@ public class CryptoUtil {
 
             return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
         } catch (Exception e) {
+            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while decrypting encrypted: " + e.getMessage());
             throw new IllegalStateException("Decryption failed", e);
         }
     }

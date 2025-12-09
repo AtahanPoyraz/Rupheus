@@ -28,7 +28,7 @@ public class Target {
         target.setId(targetModel.getId());
         target.setName(targetModel.getName());
         target.setDescription(targetModel.getDescription());
-        target.setConnectionScheme(targetModel.getScheme());
+        target.setConnectionScheme(targetModel.getConnectionScheme());
         target.setStatus(targetModel.getStatus());
         target.setCreatedAt(targetModel.getCreatedAt());
         target.setUpdatedAt(targetModel.getUpdatedAt());
