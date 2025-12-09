@@ -36,7 +36,7 @@ public class Target {
         Map<String, Object> maskedConfig = null;
         if (targetModel.getConfig() != null) {
             maskedConfig = new HashMap<>(targetModel.getConfig());
-            maskedConfig.computeIfPresent("apiKey", (k, v) -> "*".repeat(v.toString().length()));
+            maskedConfig.computeIfPresent("apiKey", (k, v) -> "************");
         }
 
         target.setConfig(maskedConfig);
