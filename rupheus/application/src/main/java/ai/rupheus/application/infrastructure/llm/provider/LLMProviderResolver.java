@@ -25,7 +25,7 @@ public class LLMProviderResolver {
 
         return switch (connectionScheme) {
             case OPENAI -> this.openAIProvider;
-            case REST ->  this.localModelProvider;
+            case LOCALMODEL ->  this.localModelProvider;
         };
     }
 }

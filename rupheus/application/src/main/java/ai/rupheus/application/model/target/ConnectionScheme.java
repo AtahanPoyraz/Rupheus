@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ConnectionScheme {
     OPENAI(OpenAIConfig.class),
-    REST(LocalModelConfig.class);
+    LOCALMODEL(LocalModelConfig.class);
 
     private final Class<?> configClass;
 

@@ -1,0 +1,91 @@
+# ---------------------------------------------------------
+#   Spring Boot / Java 17+ Professional .editorconfig
+# ---------------------------------------------------------
+
+root = true
+
+# ---------------------------------------------------------
+# Global Settings
+# ---------------------------------------------------------
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+tab_width = 4
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+# ---------------------------------------------------------
+# Java Source Files
+# ---------------------------------------------------------
+[*.{java}]
+indent_size = 4
+continuation_indent_size = 4
+ij_java_blank_lines_after_package = 1
+ij_java_blank_lines_after_imports = 1
+ij_java_blank_lines_before_class = 1
+ij_java_blank_lines_around_method = 1
+ij_java_blank_lines_around_field = 1
+ij_java_class_count_to_use_import_on_demand = 999
+ij_java_names_count_to_use_import_on_demand = 999
+ij_java_optimize_imports = true
+ij_java_wrap_long_lines = true
+ij_java_align_multiline_parameters = true
+ij_java_align_multiline_extends_list = true
+ij_java_method_call_chain_wrap = chop_down_if_long
+ij_java_method_parameters_wrap = chop_down_if_long
+ij_java_extends_list_wrap = chop_down_if_long
+ij_java_imports_layout = $*  # keep imports sorted
+
+# ---------------------------------------------------------
+# YAML (application.yml etc.)
+# ---------------------------------------------------------
+[*.{yml,yaml}]
+indent_size = 2
+indent_style = space
+
+# ---------------------------------------------------------
+# JSON and JSON5
+# ---------------------------------------------------------
+[*.json]
+indent_size = 2
+
+# ---------------------------------------------------------
+# XML (Spring configs, pom.xml formatting)
+# ---------------------------------------------------------
+[*.xml]
+indent_size = 2
+indent_style = space
+
+# ---------------------------------------------------------
+# Properties Files (application.properties)
+# ---------------------------------------------------------
+[*.properties]
+charset = utf-8
+indent_style = space
+indent_size = 0
+insert_final_newline = true
+
+# ---------------------------------------------------------
+# Markdown (README.md, docs)
+# ---------------------------------------------------------
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ---------------------------------------------------------
+# Shell scripts
+# ---------------------------------------------------------
+[*.sh]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+
+# ---------------------------------------------------------
+# Dockerfile
+# ---------------------------------------------------------
+[Dockerfile]
+indent_size = 4
+indent_style = space
