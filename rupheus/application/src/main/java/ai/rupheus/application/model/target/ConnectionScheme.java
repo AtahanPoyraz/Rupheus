@@ -6,14 +6,12 @@ import lombok.Getter;
 
 @Getter
 public enum ConnectionScheme {
-    OPENAI("provider.openai.base-url", OpenAIConfig.class),
-    REST("provider.rest.base-url", LocalModelConfig.class);
+    OPENAI(OpenAIConfig.class),
+    REST(LocalModelConfig.class);
 
-    private final String configKey;
     private final Class<?> configClass;
 
-    ConnectionScheme(String configKey, Class<?> configClass) {
-        this.configKey = configKey;
+    ConnectionScheme(Class<?> configClass) {
         this.configClass = configClass;
     }
 }

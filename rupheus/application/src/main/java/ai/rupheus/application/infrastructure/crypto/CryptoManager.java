@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Map;
 
 @Component
 public class CryptoManager {
@@ -81,6 +82,18 @@ public class CryptoManager {
         } catch (Exception e) {
             this.applicationLogger.warn(CryptoManager.class, "An error occurred while decrypting encrypted: " + e.getMessage());
             throw new IllegalStateException("Decryption failed", e);
+        }
+    }
+
+    public void encryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.encrypt(config.get(field).toString()));
+        }
+    }
+
+    public void decryptField(Map<String, Object> config, String field) {
+        if (config.containsKey(field) && config.get(field) != null) {
+            config.put(field, this.decrypt(config.get(field).toString()));
         }
     }
 }

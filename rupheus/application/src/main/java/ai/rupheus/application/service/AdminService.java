@@ -5,6 +5,9 @@ import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateTargetRequest;
 import ai.rupheus.application.dto.admin.UpdateUserRequest;
+import ai.rupheus.application.infrastructure.llm.provider.LLMProvider;
+import ai.rupheus.application.infrastructure.llm.provider.LLMProviderResolver;
+import ai.rupheus.application.infrastructure.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.model.target.ConnectionScheme;
@@ -13,17 +16,13 @@ import ai.rupheus.application.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import jakarta.validation.Validator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -32,8 +31,9 @@ public class AdminService {
     private final TargetRepository targetRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
-    private final Validator validator;
+    private final ObjectValidator objectValidator;
     private final CryptoManager cryptoManager;
+    private final LLMProviderResolver llmProviderResolver;
 
     @Autowired
     public AdminService(
@@ -41,15 +41,17 @@ public class AdminService {
             TargetRepository targetRepository,
             PasswordEncoder passwordEncoder,
             ObjectMapper objectMapper,
-            Validator validator,
-            CryptoManager cryptoManager
+            ObjectValidator objectValidator,
+            CryptoManager cryptoManager,
+            LLMProviderResolver llmProviderResolver
     ) {
         this.userRepository = userRepository;
         this.targetRepository = targetRepository;
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
-        this.validator = validator;
+        this.objectValidator = objectValidator;
         this.cryptoManager = cryptoManager;
+        this.llmProviderResolver = llmProviderResolver;
     }
 
     public UserModel getUserByUserId(UUID userId) {
@@ -161,13 +163,23 @@ public class AdminService {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
-        this.validateConfig(createTargetRequest.getConfig(),connectionScheme.getConfigClass());
-        this.encryptField(createTargetRequest.getConfig(), "apiKey");
-
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
         createdTarget.setConnectionScheme(connectionScheme);
+
+        Object configObject = this.objectMapper
+                .convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+
+        this.objectValidator.validate(configObject);
+
+        LLMProvider llmProvider = this.llmProviderResolver.resolve(connectionScheme);
+        if (!llmProvider.testConnection(configObject)) {
+            throw new IllegalStateException("Connection failed");
+        }
+
+        this.cryptoManager.encryptField(createTargetRequest.getConfig(), "apiKey");
+
         createdTarget.setConfig(createTargetRequest.getConfig());
         createdTarget.setUser(user);
 
@@ -179,13 +191,6 @@ public class AdminService {
         TargetModel updatedTarget = this.targetRepository.findById(targetId)
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
 
-        Object config = this.objectMapper.convertValue(updateTargetRequest.getConfig(), updatedTarget.getConfig().getClass());
-
-        Set<ConstraintViolation<Object>> violations = this.validator.validate(config);
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
-        }
-
         if (updateTargetRequest.getTargetName() != null && !updateTargetRequest.getTargetName().isEmpty()) {
             updatedTarget.setName(updateTargetRequest.getTargetName());
         }
@@ -195,8 +200,17 @@ public class AdminService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            this.validateConfig(updateTargetRequest.getConfig(), updatedTarget.getConnectionScheme().getConfigClass());
-            this.encryptField(updateTargetRequest.getConfig(), "apiKey");
+            Object configObject = this.objectMapper
+                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getConnectionScheme().getConfigClass());
+
+            this.objectValidator.validate(configObject);
+
+            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getConnectionScheme());
+            if (!llmProvider.testConnection(configObject)) {
+                throw new IllegalStateException("Connection failed");
+            }
+
+            this.cryptoManager.encryptField(updateTargetRequest.getConfig(), "apiKey");
 
             updatedTarget.setConfig(updateTargetRequest.getConfig());
         }
@@ -213,26 +227,5 @@ public class AdminService {
 
         this.targetRepository.deleteAllInBatch(targets);
         return targets;
-    }
-
-    private void validateConfig(Object config, Class<?> target) {
-        Object configObject = this.objectMapper.convertValue(config, target);
-        Set<ConstraintViolation<Object>> violations = validator.validate(configObject);
-
-        if (!violations.isEmpty()) {
-            throw new IllegalArgumentException("Invalid config: " + violations.iterator().next().getMessage());
-        }
-    }
-
-    private void encryptField(Map<String, Object> config, String field) {
-        if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.cryptoManager.encrypt(config.get(field).toString()));
-        }
-    }
-
-    private void decryptField(Map<String, Object> config, String field) {
-        if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.cryptoManager.decrypt(config.get(field).toString()));
-        }
     }
 }
