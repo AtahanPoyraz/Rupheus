@@ -22,7 +22,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Value("${frontend.url}")
+    @Value("${path.frontend.base_url}")
     private String frontendUrl;
 
     @Bean
