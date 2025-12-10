@@ -9,6 +9,7 @@ import ai.rupheus.application.adapter.llm.provider.LLMProvider;
 import ai.rupheus.application.adapter.llm.provider.LLMProviderResolver;
 import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.model.target.ConnectionScheme;
 import ai.rupheus.application.repository.TargetRepository;
@@ -181,6 +182,7 @@ public class AdminService {
         this.cryptoManager.encryptField(createTargetRequest.getConfig(), "apiKey");
 
         createdTarget.setConfig(createTargetRequest.getConfig());
+        createdTarget.setStatus(TargetStatus.CONNECTED);
         createdTarget.setUser(user);
 
         return this.targetRepository.save(createdTarget);
@@ -214,6 +216,8 @@ public class AdminService {
 
             updatedTarget.setConfig(updateTargetRequest.getConfig());
         }
+
+        updatedTarget.setStatus(TargetStatus.CONNECTED);
 
         return this.targetRepository.save(updatedTarget);
     }

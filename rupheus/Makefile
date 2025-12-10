@@ -15,6 +15,7 @@ restart-server:
 	docker compose up -d
 
 stop-server:
+	docker image prune
 	docker compose down -v
 
 logs:
