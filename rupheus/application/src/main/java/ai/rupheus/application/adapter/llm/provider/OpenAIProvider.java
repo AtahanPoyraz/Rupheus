@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Component
 public class OpenAIProvider implements LLMProvider {
@@ -35,6 +36,17 @@ public class OpenAIProvider implements LLMProvider {
     @Override
     public boolean testConnection(Object config) {
         OpenAIConfig openAIConfig = (OpenAIConfig) config;
-        return true;
+        try {
+            this.webClient.get()
+                .uri("/v1/models")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAIConfig.getApiKey())
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -175,7 +175,7 @@ public class AdminService {
 
         LLMProvider llmProvider = this.llmProviderResolver.resolve(connectionScheme);
         if (!llmProvider.testConnection(configObject)) {
-            throw new IllegalStateException("Connection failed");
+            throw new IllegalStateException("Connection failed, Please check your credentials");
         }
 
         this.cryptoManager.encryptField(createTargetRequest.getConfig(), "apiKey");
@@ -207,7 +207,7 @@ public class AdminService {
 
             LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getConnectionScheme());
             if (!llmProvider.testConnection(configObject)) {
-                throw new IllegalStateException("Connection failed");
+                throw new IllegalStateException("Connection failed, Please check your credentials");
             }
 
             this.cryptoManager.encryptField(updateTargetRequest.getConfig(), "apiKey");

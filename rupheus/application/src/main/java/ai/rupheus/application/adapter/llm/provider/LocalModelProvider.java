@@ -35,6 +35,17 @@ public class LocalModelProvider implements LLMProvider {
     @Override
     public boolean testConnection(Object config) {
         LocalModelConfig localModelConfig = (LocalModelConfig) config;
-        return true;
+        try {
+            this.webClient.get()
+                .uri(localModelConfig.getValidateUrl())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + localModelConfig.getApiKey())
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
