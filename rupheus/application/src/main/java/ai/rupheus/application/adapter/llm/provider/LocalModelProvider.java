@@ -1,6 +1,6 @@
-package ai.rupheus.application.infrastructure.llm.provider;
+package ai.rupheus.application.adapter.llm.provider;
 
-import ai.rupheus.application.infrastructure.llm.config.OpenAIConfig;
+import ai.rupheus.application.adapter.llm.config.LocalModelConfig;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
-public class OpenAIProvider implements LLMProvider {
-    @Value("${provider.openai.base_url}")
+public class LocalModelProvider implements LLMProvider {
+    @Value("${provider.local_model.base_url}")
     private String baseUrl;
 
     private WebClient webClient;
@@ -29,12 +29,12 @@ public class OpenAIProvider implements LLMProvider {
 
     @Override
     public Class<?> getConfigClass() {
-        return OpenAIConfig.class;
+        return LocalModelConfig.class;
     }
 
     @Override
     public boolean testConnection(Object config) {
-        OpenAIConfig openAIConfig = (OpenAIConfig) config;
+        LocalModelConfig localModelConfig = (LocalModelConfig) config;
         return true;
     }
 }

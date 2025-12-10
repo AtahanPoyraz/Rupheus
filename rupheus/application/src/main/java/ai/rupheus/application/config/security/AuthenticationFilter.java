@@ -1,6 +1,6 @@
 package ai.rupheus.application.config.security;
 
-import ai.rupheus.application.infrastructure.logger.ApplicationLogger;
+import ai.rupheus.application.common.crypto.logger.ApplicationLogger;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.service.AccessTokenService;
 import org.springframework.lang.NonNull;

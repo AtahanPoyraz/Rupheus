@@ -1,4 +1,4 @@
-package ai.rupheus.application.infrastructure.logger;
+package ai.rupheus.application.common.crypto.logger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

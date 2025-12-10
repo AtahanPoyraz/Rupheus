@@ -1,4 +1,4 @@
-package ai.rupheus.application.infrastructure.llm.provider;
+package ai.rupheus.application.adapter.llm.provider;
 
 public interface LLMProvider {
     Class<?> getConfigClass();

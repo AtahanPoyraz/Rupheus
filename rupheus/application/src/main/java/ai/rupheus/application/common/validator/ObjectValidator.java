@@ -1,4 +1,4 @@
-package ai.rupheus.application.infrastructure.validator;
+package ai.rupheus.application.common.validator;
 
 import jakarta.validation.ConstraintViolation;
 import org.springframework.beans.factory.annotation.Autowired;

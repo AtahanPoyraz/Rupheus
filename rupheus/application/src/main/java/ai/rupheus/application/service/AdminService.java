@@ -1,13 +1,13 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.infrastructure.crypto.CryptoManager;
+import ai.rupheus.application.common.crypto.CryptoManager;
 import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateTargetRequest;
 import ai.rupheus.application.dto.admin.UpdateUserRequest;
-import ai.rupheus.application.infrastructure.llm.provider.LLMProvider;
-import ai.rupheus.application.infrastructure.llm.provider.LLMProviderResolver;
-import ai.rupheus.application.infrastructure.validator.ObjectValidator;
+import ai.rupheus.application.adapter.llm.provider.LLMProvider;
+import ai.rupheus.application.adapter.llm.provider.LLMProviderResolver;
+import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.model.target.ConnectionScheme;

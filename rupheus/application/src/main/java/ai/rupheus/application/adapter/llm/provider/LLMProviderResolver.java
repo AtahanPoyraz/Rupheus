@@ -1,4 +1,4 @@
-package ai.rupheus.application.infrastructure.llm.provider;
+package ai.rupheus.application.adapter.llm.provider;
 
 import ai.rupheus.application.model.target.ConnectionScheme;
 import org.springframework.beans.factory.annotation.Autowired;

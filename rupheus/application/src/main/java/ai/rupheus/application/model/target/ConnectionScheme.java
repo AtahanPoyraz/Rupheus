@@ -1,7 +1,7 @@
 package ai.rupheus.application.model.target;
 
-import ai.rupheus.application.infrastructure.llm.config.LocalModelConfig;
-import ai.rupheus.application.infrastructure.llm.config.OpenAIConfig;
+import ai.rupheus.application.adapter.llm.config.LocalModelConfig;
+import ai.rupheus.application.adapter.llm.config.OpenAIConfig;
 import lombok.Getter;
 
 @Getter

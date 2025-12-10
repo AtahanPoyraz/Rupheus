@@ -1,6 +1,6 @@
-package ai.rupheus.application.infrastructure.crypto;
+package ai.rupheus.application.common.crypto;
 
-import ai.rupheus.application.infrastructure.logger.ApplicationLogger;
+import ai.rupheus.application.common.crypto.logger.ApplicationLogger;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
