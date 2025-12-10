@@ -1,6 +1,6 @@
 package ai.rupheus.application.dto.user;
 
-import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.user.UserModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

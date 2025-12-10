@@ -1,6 +1,6 @@
 package ai.rupheus.application.handler;
 
-import ai.rupheus.application.dto.GenericResponse;
+import ai.rupheus.application.dto.common.GenericResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

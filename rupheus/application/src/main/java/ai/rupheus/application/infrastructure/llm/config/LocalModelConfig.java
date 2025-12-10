@@ -1,4 +1,4 @@
-package ai.rupheus.application.model.pojos;
+package ai.rupheus.application.infrastructure.llm.config;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

@@ -1,8 +1,8 @@
 package ai.rupheus.application.dto.target;
 
-import ai.rupheus.application.model.TargetModel;
-import ai.rupheus.application.model.enums.ConnectionScheme;
-import ai.rupheus.application.model.enums.TargetStatus;
+import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

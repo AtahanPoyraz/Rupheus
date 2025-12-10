@@ -1,6 +1,7 @@
-package ai.rupheus.application.model;
+package ai.rupheus.application.model.user;
 
-import ai.rupheus.application.model.enums.UserRole;
+import ai.rupheus.application.model.auth.RefreshTokenModel;
+import ai.rupheus.application.model.target.TargetModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package ai.rupheus.application.model.enums;
+package ai.rupheus.application.model.user;
 
 public enum UserRole {
     ROLE_USER,

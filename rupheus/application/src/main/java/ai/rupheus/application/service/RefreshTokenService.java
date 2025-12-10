@@ -1,7 +1,7 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.model.RefreshTokenModel;
-import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.auth.RefreshTokenModel;
+import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.repository.RefreshTokenRepository;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;

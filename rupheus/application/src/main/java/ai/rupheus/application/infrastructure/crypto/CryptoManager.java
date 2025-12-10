@@ -1,6 +1,6 @@
-package ai.rupheus.application.component;
+package ai.rupheus.application.infrastructure.crypto;
 
-import ai.rupheus.application.config.logger.ApplicationLogger;
+import ai.rupheus.application.infrastructure.logger.ApplicationLogger;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +14,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Component
-public class CryptoUtil {
+public class CryptoManager {
     @Value("${security.crypto.master_key}")
     private String masterKey;
 
@@ -25,7 +25,7 @@ public class CryptoUtil {
     private final ApplicationLogger applicationLogger;
 
     @Autowired
-    public CryptoUtil(
+    public CryptoManager(
             ApplicationLogger applicationLogger
     ) {
         this.applicationLogger = applicationLogger;
@@ -36,7 +36,7 @@ public class CryptoUtil {
         byte[] keyBytes = Base64.getDecoder().decode(this.masterKey);
 
         if (keyBytes.length != 32) {
-            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while initializing crypto util");
+            this.applicationLogger.warn(CryptoManager.class, "An error occurred while initializing crypto util");
             throw new IllegalArgumentException("Master key must be exactly 32 bytes for AES-256.");
         }
 
@@ -59,7 +59,7 @@ public class CryptoUtil {
 
             return Base64.getEncoder().encodeToString(combined);
         } catch (Exception e) {
-            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while encrypting plain text: " + e.getMessage());
+            this.applicationLogger.warn(CryptoManager.class, "An error occurred while encrypting plain text: " + e.getMessage());
             throw new IllegalStateException("Encryption failed", e);
         }
     }
@@ -79,7 +79,7 @@ public class CryptoUtil {
 
             return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            this.applicationLogger.warn(CryptoUtil.class, "An error occurred while decrypting encrypted: " + e.getMessage());
+            this.applicationLogger.warn(CryptoManager.class, "An error occurred while decrypting encrypted: " + e.getMessage());
             throw new IllegalStateException("Decryption failed", e);
         }
     }

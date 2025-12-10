@@ -2,8 +2,8 @@ package ai.rupheus.application.service;
 
 import ai.rupheus.application.dto.auth.SignInRequest;
 import ai.rupheus.application.dto.auth.SignUpRequest;
-import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.model.enums.UserRole;
+import ai.rupheus.application.model.user.UserModel;
+import ai.rupheus.application.model.user.UserRole;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

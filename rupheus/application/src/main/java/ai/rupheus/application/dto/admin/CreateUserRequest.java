@@ -1,6 +1,6 @@
 package ai.rupheus.application.dto.admin;
 
-import ai.rupheus.application.model.enums.UserRole;
+import ai.rupheus.application.model.user.UserRole;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

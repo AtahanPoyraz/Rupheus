@@ -1,7 +1,6 @@
-package ai.rupheus.application.model;
+package ai.rupheus.application.model.target;
 
-import ai.rupheus.application.model.enums.ConnectionScheme;
-import ai.rupheus.application.model.enums.TargetStatus;
+import ai.rupheus.application.model.user.UserModel;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

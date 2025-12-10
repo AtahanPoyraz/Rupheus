@@ -2,7 +2,7 @@ package ai.rupheus.application.service;
 
 import ai.rupheus.application.dto.user.UpdatePasswordByIdRequest;
 import ai.rupheus.application.dto.user.UpdateUserDetailsByIdRequest;
-import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

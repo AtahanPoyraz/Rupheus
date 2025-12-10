@@ -1,7 +1,7 @@
-package ai.rupheus.application.model.enums;
+package ai.rupheus.application.model.target;
 
-import ai.rupheus.application.model.pojos.LocalModelConfig;
-import ai.rupheus.application.model.pojos.OpenAIConfig;
+import ai.rupheus.application.infrastructure.llm.config.LocalModelConfig;
+import ai.rupheus.application.infrastructure.llm.config.OpenAIConfig;
 import lombok.Getter;
 
 @Getter

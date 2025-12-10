@@ -1,10 +1,10 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.GenericResponse;
+import ai.rupheus.application.dto.common.GenericResponse;
 import ai.rupheus.application.dto.user.UpdatePasswordByIdRequest;
 import ai.rupheus.application.dto.user.UpdateUserDetailsByIdRequest;
 import ai.rupheus.application.dto.user.User;
-import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.Pattern;

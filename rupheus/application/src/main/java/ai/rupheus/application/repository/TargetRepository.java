@@ -1,6 +1,6 @@
 package ai.rupheus.application.repository;
 
-import ai.rupheus.application.model.TargetModel;
+import ai.rupheus.application.model.target.TargetModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

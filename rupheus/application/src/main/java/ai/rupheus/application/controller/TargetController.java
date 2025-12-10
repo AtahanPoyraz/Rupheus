@@ -1,12 +1,12 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.GenericResponse;
+import ai.rupheus.application.dto.common.GenericResponse;
 import ai.rupheus.application.dto.target.CreateTargetRequest;
 import ai.rupheus.application.dto.target.Target;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
-import ai.rupheus.application.model.TargetModel;
-import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.model.enums.ConnectionScheme;
+import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.user.UserModel;
+import ai.rupheus.application.model.target.ConnectionScheme;
 import ai.rupheus.application.service.TargetService;
 import ai.rupheus.application.service.UserService;
 import jakarta.validation.Valid;

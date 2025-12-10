@@ -1,4 +1,4 @@
-package ai.rupheus.application.model.enums;
+package ai.rupheus.application.model.target;
 
 public enum TargetStatus {
     ACTIVE,

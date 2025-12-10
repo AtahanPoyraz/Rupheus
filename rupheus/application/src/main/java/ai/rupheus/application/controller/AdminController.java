@@ -1,13 +1,13 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.GenericResponse;
+import ai.rupheus.application.dto.common.GenericResponse;
 import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateTargetRequest;
 import ai.rupheus.application.dto.admin.UpdateUserRequest;
-import ai.rupheus.application.model.TargetModel;
-import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.model.enums.ConnectionScheme;
+import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.user.UserModel;
+import ai.rupheus.application.model.target.ConnectionScheme;
 import ai.rupheus.application.service.AdminService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;

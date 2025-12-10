@@ -1,6 +1,6 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.model.UserModel;
+import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

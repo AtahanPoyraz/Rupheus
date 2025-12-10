@@ -1,11 +1,11 @@
 package ai.rupheus.application.service;
 
-import ai.rupheus.application.component.CryptoUtil;
+import ai.rupheus.application.infrastructure.crypto.CryptoManager;
 import ai.rupheus.application.dto.target.CreateTargetRequest;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
-import ai.rupheus.application.model.TargetModel;
-import ai.rupheus.application.model.UserModel;
-import ai.rupheus.application.model.enums.ConnectionScheme;
+import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.user.UserModel;
+import ai.rupheus.application.model.target.ConnectionScheme;
 import ai.rupheus.application.repository.TargetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,19 +26,19 @@ public class TargetService {
     private final TargetRepository targetRepository;
     private final ObjectMapper objectMapper;
     private final Validator validator;
-    private final CryptoUtil cryptoUtil;
+    private final CryptoManager cryptoManager;
 
     @Autowired
     public TargetService(
             TargetRepository targetRepository,
             ObjectMapper objectMapper,
             Validator validator,
-            CryptoUtil cryptoUtil
+            CryptoManager cryptoManager
     ) {
         this.targetRepository = targetRepository;
         this.objectMapper = objectMapper;
         this.validator = validator;
-        this.cryptoUtil = cryptoUtil;
+        this.cryptoManager = cryptoManager;
     }
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
@@ -112,13 +112,13 @@ public class TargetService {
 
     private void encryptField(Map<String, Object> config, String field) {
         if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.cryptoUtil.encrypt(config.get(field).toString()));
+            config.put(field, this.cryptoManager.encrypt(config.get(field).toString()));
         }
     }
 
     private void decryptField(Map<String, Object> config, String field) {
         if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.cryptoUtil.decrypt(config.get(field).toString()));
+            config.put(field, this.cryptoManager.decrypt(config.get(field).toString()));
         }
     }
 }

@@ -1,5 +1,6 @@
-package ai.rupheus.application.model;
+package ai.rupheus.application.model.auth;
 
+import ai.rupheus.application.model.user.UserModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

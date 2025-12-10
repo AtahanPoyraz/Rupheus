@@ -1,4 +1,4 @@
-package ai.rupheus.application.dto;
+package ai.rupheus.application.dto.common;
 
 import lombok.Getter;
 import lombok.Setter;
