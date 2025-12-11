@@ -38,18 +38,19 @@ public class LocalModelProvider implements LLMProvider {
     @Override
     public boolean testConnection(Object config) {
         LocalModelConfig localModelConfig = (LocalModelConfig) config;
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(localModelConfig.getValidateUrl()))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + localModelConfig.getApiKey())
-                .GET()
-                .build();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(localModelConfig.getValidateUrl()))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + localModelConfig.getApiKey())
+            .GET()
+            .build();
 
-            HttpResponse<Void> response = this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        try {
+            HttpResponse<Void> response =
+                this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 
             return response.statusCode() == 200;
         } catch (Exception e) {
-            return false;
+            throw new IllegalStateException("Local model credentials validation failed: " + e.getMessage(), e);
         }
     }
 }

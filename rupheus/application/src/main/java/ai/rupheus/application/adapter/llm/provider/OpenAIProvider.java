@@ -21,7 +21,7 @@ public class OpenAIProvider implements LLMProvider {
     @PostConstruct
     private void init() {
         if (this.baseUrl == null || this.baseUrl.isEmpty()) {
-            throw new IllegalStateException("Local model base url is empty");
+            throw new IllegalStateException("OpenAI base url is empty");
         }
 
         this.httpClient = HttpClient.newBuilder()
@@ -38,18 +38,23 @@ public class OpenAIProvider implements LLMProvider {
     @Override
     public boolean testConnection(Object config) {
         OpenAIConfig openAIConfig = (OpenAIConfig) config;
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + "/v1/models"))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAIConfig.getApiKey())
+            .GET()
+            .build();
+
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/v1/models"))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAIConfig.getApiKey())
-                .GET()
-                .build();
+            HttpResponse<Void> response =
+                this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 
-            HttpResponse<Void> response = this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() == 200) {
+                return true;
+            }
 
-            return response.statusCode() == 200;
+            throw new IllegalStateException("OpenAI credentials returned status: " + response.statusCode());
         } catch (Exception e) {
-            return false;
+            throw new IllegalStateException("OpenAI credentials validation failed: " + e.getMessage(), e);
         }
     }
 }
