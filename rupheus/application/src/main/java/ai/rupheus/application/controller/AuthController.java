@@ -1,6 +1,6 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.common.GenericResponse;
+import ai.rupheus.application.dto.shared.GenericResponse;
 import ai.rupheus.application.dto.auth.SignInRequest;
 import ai.rupheus.application.dto.auth.SignUpRequest;
 import ai.rupheus.application.model.user.UserModel;

@@ -1,6 +1,6 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.common.GenericResponse;
+import ai.rupheus.application.dto.shared.GenericResponse;
 import ai.rupheus.application.dto.admin.CreateTargetRequest;
 import ai.rupheus.application.dto.admin.CreateUserRequest;
 import ai.rupheus.application.dto.admin.UpdateTargetRequest;
