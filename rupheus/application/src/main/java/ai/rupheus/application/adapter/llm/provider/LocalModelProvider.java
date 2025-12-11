@@ -4,16 +4,19 @@ import ai.rupheus.application.adapter.llm.config.LocalModelConfig;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Component
 public class LocalModelProvider implements LLMProvider {
     @Value("${provider.local_model.base_url}")
     private String baseUrl;
 
-    private WebClient webClient;
+    private HttpClient httpClient;
 
     @PostConstruct
     private void init() {
@@ -21,10 +24,10 @@ public class LocalModelProvider implements LLMProvider {
             throw new IllegalStateException("Local model base url is empty");
         }
 
-        this.webClient = WebClient.builder()
-                .baseUrl(this.baseUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        this.httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .connectTimeout(java.time.Duration.ofSeconds(2))
+            .build();
     }
 
     @Override
@@ -36,14 +39,15 @@ public class LocalModelProvider implements LLMProvider {
     public boolean testConnection(Object config) {
         LocalModelConfig localModelConfig = (LocalModelConfig) config;
         try {
-            this.webClient.get()
-                .uri(localModelConfig.getValidateUrl())
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(localModelConfig.getValidateUrl()))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + localModelConfig.getApiKey())
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+                .GET()
+                .build();
 
-            return true;
+            HttpResponse<Void> response = this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+
+            return response.statusCode() == 200;
         } catch (Exception e) {
             return false;
         }

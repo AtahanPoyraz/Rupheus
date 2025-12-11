@@ -4,17 +4,19 @@ import ai.rupheus.application.adapter.llm.config.OpenAIConfig;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Component
 public class OpenAIProvider implements LLMProvider {
     @Value("${provider.openai.base_url}")
     private String baseUrl;
 
-    private WebClient webClient;
+    private HttpClient httpClient;
 
     @PostConstruct
     private void init() {
@@ -22,10 +24,10 @@ public class OpenAIProvider implements LLMProvider {
             throw new IllegalStateException("Local model base url is empty");
         }
 
-        this.webClient = WebClient.builder()
-                .baseUrl(this.baseUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        this.httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .connectTimeout(java.time.Duration.ofSeconds(2))
+            .build();
     }
 
     @Override
@@ -37,14 +39,15 @@ public class OpenAIProvider implements LLMProvider {
     public boolean testConnection(Object config) {
         OpenAIConfig openAIConfig = (OpenAIConfig) config;
         try {
-            this.webClient.get()
-                .uri("/v1/models")
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/v1/models"))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAIConfig.getApiKey())
-                .retrieve()
-                .toBodilessEntity()
-                .block();
+                .GET()
+                .build();
 
-            return true;
+            HttpResponse<Void> response = this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+
+            return response.statusCode() == 200;
         } catch (Exception e) {
             return false;
         }
