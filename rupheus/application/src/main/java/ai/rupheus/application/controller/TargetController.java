@@ -58,25 +58,25 @@ public class TargetController {
                     );
         }
 
-        if (pageable != null) {
+        if (pageable.isPaged()) {
             Page<TargetModel> fetchedTargets = this.targetService.getTargets(pageable);
             return ResponseEntity.status(HttpStatus.OK)
                 .body(
                     new GenericResponse<>(
                         HttpStatus.OK.value(),
                         "Targets fetched successfully",
-                        fetchedTargets
+                        Target.fromEntity(fetchedTargets)
                     )
                 );
         }
 
-        List<TargetModel> fetchedTarget = this.targetService.getTargetByUserId(fetchedUser.getId());
+        List<TargetModel> fetchedTargets = this.targetService.getTargetByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(
                                 HttpStatus.OK.value(),
-                                "Target fetched successfully",
-                                Target.fromEntity(fetchedTarget)
+                                "Targets fetched successfully",
+                                Target.fromEntity(fetchedTargets)
                         )
                 );
     }

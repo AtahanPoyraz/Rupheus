@@ -6,6 +6,8 @@ import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,5 +52,18 @@ public class Target {
         }
 
         return targets;
+    }
+
+    public static Page<Target> fromEntity(Page<TargetModel> targetModels) {
+        List<Target> mapped = targetModels.getContent()
+            .stream()
+            .map(Target::fromEntity)
+            .toList();
+
+        return new PageImpl<>(
+            mapped,
+            targetModels.getPageable(),
+            targetModels.getTotalElements()
+        );
     }
 }
