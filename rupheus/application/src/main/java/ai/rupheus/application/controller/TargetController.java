@@ -49,13 +49,13 @@ public class TargetController {
         if (targetId != null) {
             TargetModel fetchedTarget = this.targetService.getTargetByTargetId(fetchedUser.getId(), targetId);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.OK.value(),
-                                    "Target fetched successfully",
-                                    Target.fromEntity(fetchedTarget)
-                            )
-                    );
+                .body(
+                    new GenericResponse<>(
+                        HttpStatus.OK.value(),
+                        "Target fetched successfully",
+                        Target.fromEntity(fetchedTarget)
+                    )
+                );
         }
 
         if (pageable.isPaged()) {
@@ -72,13 +72,13 @@ public class TargetController {
 
         List<TargetModel> fetchedTargets = this.targetService.getTargetByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Targets fetched successfully",
-                                Target.fromEntity(fetchedTargets)
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.OK.value(),
+                    "Targets fetched successfully",
+                    Target.fromEntity(fetchedTargets)
+                )
+            );
     }
 
     @PostMapping
@@ -89,13 +89,13 @@ public class TargetController {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         TargetModel createdTarget = this.targetService.createTarget(fetchedUser, provider, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.CREATED.value(),
-                                "Target created successfully",
-                                Target.fromEntity(createdTarget)
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.CREATED.value(),
+                    "Target created successfully",
+                    Target.fromEntity(createdTarget)
+                )
+            );
     }
 
     @PatchMapping
@@ -106,13 +106,13 @@ public class TargetController {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.getId(), targetId, updateTargetRequest);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Target updated successfully",
-                                Target.fromEntity(updatedTarget)
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.OK.value(),
+                    "Target updated successfully",
+                    Target.fromEntity(updatedTarget)
+                )
+            );
     }
 
     @DeleteMapping
@@ -122,13 +122,13 @@ public class TargetController {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.getId(), targetId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "Target deleted successfully",
-                                Target.fromEntity(deletedTarget)
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.OK.value(),
+                    "Target deleted successfully",
+                    Target.fromEntity(deletedTarget)
+                )
+            );
     }
 
     private UserModel getUserFromSecurityContext() {
