@@ -6,12 +6,13 @@ import ai.rupheus.application.dto.target.Target;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.service.TargetService;
 import ai.rupheus.application.service.UserService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,18 @@ public class TargetController {
                     );
         }
 
+        if (pageable != null) {
+            Page<TargetModel> fetchedTargets = this.targetService.getTargets(pageable);
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                    new GenericResponse<>(
+                        HttpStatus.OK.value(),
+                        "Targets fetched successfully",
+                        fetchedTargets
+                    )
+                );
+        }
+
         List<TargetModel> fetchedTarget = this.targetService.getTargetByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
@@ -70,11 +83,11 @@ public class TargetController {
 
     @PostMapping
     public ResponseEntity<GenericResponse<?>> createTarget(
-            @RequestParam ConnectionScheme connectionScheme,
+            @RequestParam Provider provider,
             @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
-        TargetModel createdTarget = this.targetService.createTarget(fetchedUser, connectionScheme, createTargetRequest);
+        TargetModel createdTarget = this.targetService.createTarget(fetchedUser, provider, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         new GenericResponse<>(

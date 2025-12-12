@@ -11,7 +11,7 @@ import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -160,21 +160,21 @@ public class AdminService {
     }
 
     @Transactional
-    public TargetModel createTarget(ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
+    public TargetModel createTarget(Provider provider, CreateTargetRequest createTargetRequest) {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setConnectionScheme(connectionScheme);
+        createdTarget.setProvider(provider);
 
         Object configObject = this.objectMapper
-                .convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+                .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
 
         this.objectValidator.validate(configObject);
 
-        LLMProvider llmProvider = this.llmProviderResolver.resolve(connectionScheme);
+        LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
         if (!llmProvider.testConnection(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
@@ -203,11 +203,11 @@ public class AdminService {
 
         if (updateTargetRequest.getConfig() != null) {
             Object configObject = this.objectMapper
-                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getConnectionScheme().getConfigClass());
+                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
 
             this.objectValidator.validate(configObject);
 
-            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getConnectionScheme());
+            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
             if (!llmProvider.testConnection(configObject)) {
                 throw new IllegalStateException("Connection failed, Please check your credentials");
             }

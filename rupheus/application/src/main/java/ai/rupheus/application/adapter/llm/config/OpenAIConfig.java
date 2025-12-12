@@ -14,6 +14,4 @@ public class OpenAIConfig {
 
     @NotEmpty(message = "Model cannot be empty")
     private String model;
-    private Double temperature;
-    private Integer maxTokens;
 }

@@ -1,7 +1,7 @@
 package ai.rupheus.application.dto.target;
 
 import ai.rupheus.application.model.target.TargetModel;
-import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class Target {
     private UUID id;
     private String name;
     private String description;
-    private ConnectionScheme connectionScheme;
+    private Provider provider;
     private Map<String, Object> config;
     private TargetStatus status;
     private LocalDateTime createdAt;
@@ -28,7 +28,7 @@ public class Target {
         target.setId(targetModel.getId());
         target.setName(targetModel.getName());
         target.setDescription(targetModel.getDescription());
-        target.setConnectionScheme(targetModel.getConnectionScheme());
+        target.setProvider(targetModel.getProvider());
         target.setStatus(targetModel.getStatus());
         target.setCreatedAt(targetModel.getCreatedAt());
         target.setUpdatedAt(targetModel.getUpdatedAt());

@@ -7,7 +7,7 @@ import ai.rupheus.application.dto.admin.UpdateTargetRequest;
 import ai.rupheus.application.dto.admin.UpdateUserRequest;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.service.AdminService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -164,10 +164,10 @@ public class AdminController {
 
     @PostMapping("/target")
     public ResponseEntity<GenericResponse<?>> createTarget(
-            @RequestParam ConnectionScheme connectionScheme,
+            @RequestParam Provider provider,
             @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
-        TargetModel createdTarget = this.adminService.createTarget(connectionScheme, createTargetRequest);
+        TargetModel createdTarget = this.adminService.createTarget(provider, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
                         new GenericResponse<>(

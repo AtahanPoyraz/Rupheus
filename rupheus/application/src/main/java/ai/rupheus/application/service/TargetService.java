@@ -9,12 +9,14 @@ import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.ConnectionScheme;
+import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.repository.TargetRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,23 +50,27 @@ public class TargetService {
                 .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
     }
 
+    public Page<TargetModel> getTargets(Pageable pageable) {
+        return this.targetRepository.findAll(pageable);
+    }
+
     public List<TargetModel> getTargetByUserId(UUID userId) {
         return this.targetRepository.findAllByUser_Id(userId);
     }
 
     @Transactional
-    public TargetModel createTarget(UserModel user, ConnectionScheme connectionScheme, CreateTargetRequest createTargetRequest) {
+    public TargetModel createTarget(UserModel user, Provider provider, CreateTargetRequest createTargetRequest) {
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setConnectionScheme(connectionScheme);
+        createdTarget.setProvider(provider);
 
         Object configObject = this.objectMapper
-                .convertValue(createTargetRequest.getConfig(), connectionScheme.getConfigClass());
+                .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
 
         this.objectValidator.validate(configObject);
 
-        LLMProvider llmProvider = this.llmProviderResolver.resolve(connectionScheme);
+        LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
         if (!llmProvider.testConnection(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
@@ -93,11 +99,11 @@ public class TargetService {
 
         if (updateTargetRequest.getConfig() != null) {
             Object configObject = this.objectMapper
-                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getConnectionScheme().getConfigClass());
+                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
 
             this.objectValidator.validate(configObject);
 
-            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getConnectionScheme());
+            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
             if (!llmProvider.testConnection(configObject)) {
                 throw new IllegalStateException("Connection failed, Please check your credentials");
             }

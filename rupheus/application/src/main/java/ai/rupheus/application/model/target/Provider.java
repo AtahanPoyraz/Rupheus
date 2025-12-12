@@ -5,13 +5,13 @@ import ai.rupheus.application.adapter.llm.config.OpenAIConfig;
 import lombok.Getter;
 
 @Getter
-public enum ConnectionScheme {
+public enum Provider {
     OPENAI(OpenAIConfig.class),
     LOCALMODEL(LocalModelConfig.class);
 
     private final Class<?> configClass;
 
-    ConnectionScheme(Class<?> configClass) {
+    Provider(Class<?> configClass) {
         this.configClass = configClass;
     }
 }
