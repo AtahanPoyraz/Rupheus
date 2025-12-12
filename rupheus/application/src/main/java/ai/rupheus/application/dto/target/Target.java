@@ -56,10 +56,13 @@ public class Target {
     }
 
     public static PageableResponse<List<Target>> fromEntity(Page<TargetModel> targetModels) {
-        List<Target> targets = targetModels.getContent()
+        List<Target> mappedTargets = targetModels.getContent()
             .stream()
             .map(Target::fromEntity)
             .toList();
+
+        PageableResponse<List<Target>> response = new PageableResponse<>();
+        response.setContent(mappedTargets);
 
         PageableResponse.PageableInfo pageableInfo = new PageableResponse.PageableInfo();
         pageableInfo.setPage(targetModels.getNumber());
@@ -67,10 +70,20 @@ public class Target {
         pageableInfo.setTotalItems(targetModels.getTotalElements());
         pageableInfo.setTotalPages(targetModels.getTotalPages());
 
-        PageableResponse<List<Target>> pageableResponse = new PageableResponse<>();
-        pageableResponse.setContent(targets);
-        pageableResponse.setPageable(pageableInfo);
+        pageableInfo.setHasNext(targetModels.hasNext());
+        pageableInfo.setHasPrevious(targetModels.hasPrevious());
+        pageableInfo.setFirst(targetModels.isFirst());
+        pageableInfo.setLast(targetModels.isLast());
 
-        return pageableResponse;
+        PageableResponse.SortInfo sortInfo = new PageableResponse.SortInfo();
+        sortInfo.setSorted(targetModels.getSort().isSorted());
+        sortInfo.setUnsorted(targetModels.getSort().isUnsorted());
+        sortInfo.setEmpty(targetModels.getSort().isEmpty());
+
+        pageableInfo.setSort(sortInfo);
+
+        response.setPageable(pageableInfo);
+
+        return response;
     }
 }
