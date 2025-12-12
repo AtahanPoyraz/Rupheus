@@ -50,7 +50,7 @@ public class OpenAIProvider implements LLMProvider {
 
             return response.statusCode() == 200;
         } catch (Exception e) {
-            throw new IllegalStateException("OpenAI credentials validation failed: " + e.getMessage(), e);
+            throw new IllegalStateException("An error occurred while validating OpenAI credentials: " + e.getMessage(), e);
         }
     }
 }

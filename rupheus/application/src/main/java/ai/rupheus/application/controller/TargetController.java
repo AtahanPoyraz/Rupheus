@@ -104,10 +104,10 @@ public class TargetController {
 
     @DeleteMapping
     public ResponseEntity<GenericResponse<?>> deleteTarget(
-            @RequestParam List<UUID> targetIds
+            @RequestParam List<UUID> targetId
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
-        List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.getId(), targetIds);
+        List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.getId(), targetId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
                         new GenericResponse<>(

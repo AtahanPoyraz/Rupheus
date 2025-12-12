@@ -50,7 +50,7 @@ public class LocalModelProvider implements LLMProvider {
 
             return response.statusCode() == 200;
         } catch (Exception e) {
-            throw new IllegalStateException("Local model credentials validation failed: " + e.getMessage(), e);
+            throw new IllegalStateException("An error occurred while validating Local Model credentials: " + e.getMessage(), e);
         }
     }
 }
