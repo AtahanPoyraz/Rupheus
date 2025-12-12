@@ -1,5 +1,6 @@
 package ai.rupheus.application.dto.target;
 
+import ai.rupheus.application.dto.shared.PageableResponse;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.model.target.TargetStatus;
@@ -54,16 +55,22 @@ public class Target {
         return targets;
     }
 
-    public static Page<Target> fromEntity(Page<TargetModel> targetModels) {
-        List<Target> mapped = targetModels.getContent()
+    public static PageableResponse<List<Target>> fromEntity(Page<TargetModel> targetModels) {
+        List<Target> targets = targetModels.getContent()
             .stream()
             .map(Target::fromEntity)
             .toList();
 
-        return new PageImpl<>(
-            mapped,
-            targetModels.getPageable(),
-            targetModels.getTotalElements()
-        );
+        PageableResponse.PageableInfo pageableInfo = new PageableResponse.PageableInfo();
+        pageableInfo.setPage(targetModels.getNumber());
+        pageableInfo.setSize(targetModels.getSize());
+        pageableInfo.setTotalItems(targetModels.getTotalElements());
+        pageableInfo.setTotalPages(targetModels.getTotalPages());
+
+        PageableResponse<List<Target>> pageableResponse = new PageableResponse<>();
+        pageableResponse.setContent(targets);
+        pageableResponse.setPageable(pageableInfo);
+
+        return pageableResponse;
     }
 }
