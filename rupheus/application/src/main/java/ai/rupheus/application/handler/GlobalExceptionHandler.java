@@ -20,14 +20,14 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<GenericResponse<?>> handleValidationExceptions(
-            MethodArgumentNotValidException e
+        MethodArgumentNotValidException e
     ) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach((error) -> {
-                    String fieldName = ((FieldError) error).getField();
-                    String errorMessage = error.getDefaultMessage();
-                    errors.put(fieldName, errorMessage);
-                }
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            }
         );
 
         return this.createGenericResponseForException(HttpStatus.BAD_REQUEST, "An validation error occurred", errors);
@@ -35,58 +35,58 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<GenericResponse<?>> handleEntityNotFoundException(
-            EntityNotFoundException e
+        EntityNotFoundException e
     ) {
         return this.createGenericResponseForException(HttpStatus.NOT_FOUND, e.getMessage(), null);
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<GenericResponse<?>> handleIllegalStateException(
-            IllegalStateException e
+        IllegalStateException e
     ) {
         return this.createGenericResponseForException(HttpStatus.CONFLICT, e.getMessage(), null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<GenericResponse<?>> handleIllegalArgumentException(
-            IllegalArgumentException e
+        IllegalArgumentException e
     ) {
         return this.createGenericResponseForException(HttpStatus.BAD_REQUEST, e.getMessage(), null);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<GenericResponse<?>> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException e
+        HttpMessageNotReadableException e
     ) {
         return this.createGenericResponseForException(HttpStatus.BAD_REQUEST, e.getMessage(), null);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<GenericResponse<?>> handleDataIntegrityViolationException(
-            DataIntegrityViolationException e
+        DataIntegrityViolationException e
     ) {
         return this.createGenericResponseForException(HttpStatus.BAD_REQUEST, "Data integrity violation", null);
     }
 
     @ExceptionHandler({AuthenticationCredentialsNotFoundException.class, BadCredentialsException.class})
     public ResponseEntity<GenericResponse<?>> handleAuthenticationCredentialsNotFoundException(
-            AuthenticationCredentialsNotFoundException e
+        AuthenticationCredentialsNotFoundException e
     ) {
         return this.createGenericResponseForException(HttpStatus.UNAUTHORIZED, e.getMessage(), null);
     }
 
     private <T> ResponseEntity<GenericResponse<?>> createGenericResponseForException(
-            HttpStatus status,
-            String exceptionMessage,
-            T data
+        HttpStatus status,
+        String exceptionMessage,
+        T data
     ) {
         return ResponseEntity.status(status)
-                .body(
-                        new GenericResponse<>(
-                                status.value(),
-                                exceptionMessage,
-                                data
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    status.value(),
+                    exceptionMessage,
+                    data
+                )
+            );
     }
 }

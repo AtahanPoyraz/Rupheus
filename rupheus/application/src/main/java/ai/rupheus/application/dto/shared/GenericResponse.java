@@ -11,9 +11,9 @@ public class GenericResponse<T> {
     private T data;
 
     public GenericResponse(
-            int statusCode,
-            String message,
-            T data
+        int statusCode,
+        String message,
+        T data
     ) {
         this.statusCode = statusCode;
         this.message = message;
@@ -23,9 +23,9 @@ public class GenericResponse<T> {
     @Override
     public String toString() {
         return "GenericResponse{" +
-                "statusCode=" + statusCode +
-                ", message='" + message + '\'' +
-                ", data=" + data +
-                '}';
+            "statusCode=" + statusCode +
+            ", message='" + message + '\'' +
+            ", data=" + data +
+            '}';
     }
 }

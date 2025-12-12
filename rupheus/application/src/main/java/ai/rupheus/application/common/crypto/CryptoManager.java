@@ -1,6 +1,6 @@
 package ai.rupheus.application.common.crypto;
 
-import ai.rupheus.application.common.crypto.logger.ApplicationLogger;
+import ai.rupheus.application.common.logger.ApplicationLogger;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class CryptoManager {
 
     @Autowired
     public CryptoManager(
-            ApplicationLogger applicationLogger
+        ApplicationLogger applicationLogger
     ) {
         this.applicationLogger = applicationLogger;
     }

@@ -38,13 +38,13 @@ public class AdminService {
 
     @Autowired
     public AdminService(
-            UserRepository userRepository,
-            TargetRepository targetRepository,
-            PasswordEncoder passwordEncoder,
-            ObjectMapper objectMapper,
-            ObjectValidator objectValidator,
-            CryptoManager cryptoManager,
-            LLMProviderResolver llmProviderResolver
+        UserRepository userRepository,
+        TargetRepository targetRepository,
+        PasswordEncoder passwordEncoder,
+        ObjectMapper objectMapper,
+        ObjectValidator objectValidator,
+        CryptoManager cryptoManager,
+        LLMProviderResolver llmProviderResolver
     ) {
         this.userRepository = userRepository;
         this.targetRepository = targetRepository;
@@ -57,12 +57,12 @@ public class AdminService {
 
     public UserModel getUserByUserId(UUID userId) {
         return this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
     }
 
     public UserModel getUserByEmail(String email) {
         return this.userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
     public Page<UserModel> getAllUsers(Pageable pageable) {
@@ -72,7 +72,7 @@ public class AdminService {
     @Transactional
     public UserModel createUser(CreateUserRequest createUserRequest) {
         this.userRepository.findByEmail(createUserRequest.getEmail())
-                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + createUserRequest.getEmail());});
+            .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + createUserRequest.getEmail());});
 
         UserModel createdUser = new UserModel();
         createdUser.setFirstName(createUserRequest.getFirstName());
@@ -91,7 +91,7 @@ public class AdminService {
     @Transactional
     public UserModel updateUserByUserId(UUID userId, UpdateUserRequest updateUserRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (updateUserRequest.getFirstName() != null && !updateUserRequest.getFirstName().isEmpty()) {
             updatedUser.setFirstName(updateUserRequest.getFirstName());
@@ -134,7 +134,6 @@ public class AdminService {
 
     @Transactional
     public List<UserModel> deleteUserByUserIds(List<UUID> userIds) {
-
         List<UserModel> users = this.userRepository.findAllById(userIds);
 
         if (users.isEmpty()) {
@@ -148,7 +147,7 @@ public class AdminService {
 
     public TargetModel getTargetByTargetId(UUID targetId) {
         return this.targetRepository.findById(targetId)
-                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+            .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
     }
 
     public List<TargetModel> getTargetByUserId(UUID userId) {
@@ -162,7 +161,7 @@ public class AdminService {
     @Transactional
     public TargetModel createTarget(Provider provider, CreateTargetRequest createTargetRequest) {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
@@ -170,12 +169,12 @@ public class AdminService {
         createdTarget.setProvider(provider);
 
         Object configObject = this.objectMapper
-                .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
+            .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
 
         this.objectValidator.validate(configObject);
 
         LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
-        if (!llmProvider.testConnection(configObject)) {
+        if (llmProvider.testConnection(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
 
@@ -191,7 +190,7 @@ public class AdminService {
     @Transactional
     public TargetModel updateTargetByTargetId(UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findById(targetId)
-                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+            .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
 
         if (updateTargetRequest.getTargetName() != null && !updateTargetRequest.getTargetName().isEmpty()) {
             updatedTarget.setName(updateTargetRequest.getTargetName());
@@ -203,12 +202,12 @@ public class AdminService {
 
         if (updateTargetRequest.getConfig() != null) {
             Object configObject = this.objectMapper
-                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
+                .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
 
             this.objectValidator.validate(configObject);
 
             LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
-            if (!llmProvider.testConnection(configObject)) {
+            if (llmProvider.testConnection(configObject)) {
                 throw new IllegalStateException("Connection failed, Please check your credentials");
             }
 

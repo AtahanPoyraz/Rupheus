@@ -19,8 +19,8 @@ public class AuthService {
 
     @Autowired
     public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -29,7 +29,7 @@ public class AuthService {
     @Transactional
     public UserModel signUp(SignUpRequest signUpRequest) {
         this.userRepository.findByEmail(signUpRequest.getEmail())
-                .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + signUpRequest.getEmail());}
+            .ifPresent(_ -> {throw new IllegalStateException("User already exists with email: " + signUpRequest.getEmail());}
         );
 
         UserModel signedUpUser = new UserModel();
@@ -48,7 +48,7 @@ public class AuthService {
 
     public UserModel signIn(SignInRequest signInRequest) {
         return this.userRepository.findByEmail(signInRequest.getEmail())
-                .filter(signedInUser -> this.passwordEncoder.matches(signInRequest.getPassword().trim(), signedInUser.getPassword()))
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+            .filter(signedInUser -> this.passwordEncoder.matches(signInRequest.getPassword().trim(), signedInUser.getPassword()))
+            .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     }
 }

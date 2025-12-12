@@ -33,8 +33,8 @@ public class TargetController {
 
     @Autowired
     public TargetController(
-            TargetService targetService,
-            UserService userService
+        TargetService targetService,
+        UserService userService
     ) {
         this.targetService = targetService;
         this.userService = userService;
@@ -42,8 +42,8 @@ public class TargetController {
 
     @GetMapping
     public ResponseEntity<GenericResponse<?>> getTarget(
-            @RequestParam(required = false) UUID targetId,
-            @ParameterObject Pageable pageable
+        @RequestParam(required = false) UUID targetId,
+        @ParameterObject Pageable pageable
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         if (targetId != null) {
@@ -65,7 +65,7 @@ public class TargetController {
                     new GenericResponse<>(
                         HttpStatus.OK.value(),
                         "Targets fetched successfully",
-                        Target.fromEntity(fetchedTargets)
+                        Target.fromPage(fetchedTargets)
                     )
                 );
         }
@@ -83,8 +83,8 @@ public class TargetController {
 
     @PostMapping
     public ResponseEntity<GenericResponse<?>> createTarget(
-            @RequestParam Provider provider,
-            @Valid @RequestBody CreateTargetRequest createTargetRequest
+        @RequestParam Provider provider,
+        @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         TargetModel createdTarget = this.targetService.createTarget(fetchedUser, provider, createTargetRequest);
@@ -100,8 +100,8 @@ public class TargetController {
 
     @PatchMapping
     public ResponseEntity<GenericResponse<?>> updateTarget(
-            @RequestParam UUID targetId,
-            @RequestBody UpdateTargetRequest updateTargetRequest
+        @RequestParam UUID targetId,
+        @RequestBody UpdateTargetRequest updateTargetRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         TargetModel updatedTarget = this.targetService.updateTargetByTargetId(fetchedUser.getId(), targetId, updateTargetRequest);
@@ -117,7 +117,7 @@ public class TargetController {
 
     @DeleteMapping
     public ResponseEntity<GenericResponse<?>> deleteTarget(
-            @RequestParam List<UUID> targetId
+        @RequestParam List<UUID> targetId
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         List<TargetModel> deletedTarget = this.targetService.deleteTargetByTargetIds(fetchedUser.getId(), targetId);

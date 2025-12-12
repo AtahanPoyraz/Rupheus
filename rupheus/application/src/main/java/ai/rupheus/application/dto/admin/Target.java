@@ -1,14 +1,13 @@
-package ai.rupheus.application.dto.target;
+package ai.rupheus.application.dto.admin;
 
 import ai.rupheus.application.dto.shared.PageableResponse;
-import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,14 +34,7 @@ public class Target {
         target.setStatus(targetModel.getStatus());
         target.setCreatedAt(targetModel.getCreatedAt());
         target.setUpdatedAt(targetModel.getUpdatedAt());
-
-        Map<String, Object> maskedConfig = null;
-        if (targetModel.getConfig() != null) {
-            maskedConfig = new HashMap<>(targetModel.getConfig());
-            maskedConfig.computeIfPresent("apiKey", (k, v) -> "************");
-        }
-
-        target.setConfig(maskedConfig);
+        target.setConfig(targetModel.getConfig());
         return target;
     }
 

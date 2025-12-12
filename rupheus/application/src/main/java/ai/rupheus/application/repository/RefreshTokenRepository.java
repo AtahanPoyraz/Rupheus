@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenModel, UUID> {
     Optional<RefreshTokenModel> findByTokenHash(String tokenHash);
     Optional<RefreshTokenModel> findByTokenHashAndIsRevokedFalseAndExpiresAtAfter(
-            String tokenHash,
-            LocalDateTime now
+        String tokenHash,
+        LocalDateTime now
     );
 }

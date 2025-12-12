@@ -28,8 +28,8 @@ public class UserController {
 
     @Autowired
     public UserController(
-            UserService userService,
-            ObjectMapper objectMapper
+        UserService userService,
+        ObjectMapper objectMapper
     ) {
         this.userService = userService;
         this.objectMapper = objectMapper;
@@ -39,19 +39,19 @@ public class UserController {
     public ResponseEntity<GenericResponse<?>> getUser() {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "User fetched successfully",
-                                User.fromEntity(fetchedUser)
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.OK.value(),
+                    "User fetched successfully",
+                    User.fromEntity(fetchedUser)
+                )
+            );
     }
 
     @PatchMapping
     public ResponseEntity<GenericResponse<?>> updateUser(
-            @RequestParam @Pattern(regexp = "details|password", message = "Invalid sectionType") String sectionType,
-            @RequestBody Map<String, Object> updateRequest
+        @RequestParam @Pattern(regexp = "details|password", message = "Invalid sectionType") String sectionType,
+        @RequestBody Map<String, Object> updateRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         if (sectionType.equals("details")) {
@@ -60,13 +60,13 @@ public class UserController {
 
             UserModel updatedUser = userService.updateUserDetailsByUserId(fetchedUser.getId(), updateUserDetailsByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.OK.value(),
-                                    "User updated successfully",
-                                    User.fromEntity(updatedUser)
-                            )
-                    );
+                .body(
+                    new GenericResponse<>(
+                        HttpStatus.OK.value(),
+                        "User updated successfully",
+                        User.fromEntity(updatedUser)
+                    )
+                );
         }
 
         if (sectionType.equals("password")) {
@@ -75,23 +75,23 @@ public class UserController {
 
             UserModel updatedUser = userService.updatePasswordByUserId(fetchedUser.getId(), updatePasswordByIdRequest);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(
-                            new GenericResponse<>(
-                                    HttpStatus.OK.value(),
-                                    "User updated successfully",
-                                    User.fromEntity(updatedUser)
-                            )
-                    );
+                .body(
+                    new GenericResponse<>(
+                        HttpStatus.OK.value(),
+                        "User updated successfully",
+                        User.fromEntity(updatedUser)
+                    )
+                );
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.BAD_REQUEST.value(),
-                                "Section type is invalid",
-                                null
-                        )
-                );
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Section type is invalid",
+                    null
+                )
+            );
     }
 
     @DeleteMapping
@@ -99,14 +99,14 @@ public class UserController {
         UserModel fetchedUser = this.getUserFromSecurityContext();
         UserModel deletedUser = this.userService.deleteUserByUserId(fetchedUser.getId());
         return ResponseEntity.status(HttpStatus.OK)
-                .body(
-                        new GenericResponse<>(
-                                HttpStatus.OK.value(),
-                                "User deleted successfully",
-                                deletedUser
+            .body(
+                new GenericResponse<>(
+                    HttpStatus.OK.value(),
+                    "User deleted successfully",
+                    deletedUser
 
-                        )
-                );
+                )
+            );
     }
 
     private UserModel getUserFromSecurityContext() {

@@ -11,8 +11,8 @@ public class LLMProviderResolver {
 
     @Autowired
     public LLMProviderResolver(
-            OpenAIProvider openAIProvider,
-            LocalModelProvider localModelProvider
+        OpenAIProvider openAIProvider,
+        LocalModelProvider localModelProvider
     ) {
         this.openAIProvider = openAIProvider;
         this.localModelProvider = localModelProvider;
@@ -25,7 +25,7 @@ public class LLMProviderResolver {
 
         return switch (provider) {
             case OPENAI -> this.openAIProvider;
-            case LOCALMODEL ->  this.localModelProvider;
+            case LOCALMODEL -> this.localModelProvider;
         };
     }
 }

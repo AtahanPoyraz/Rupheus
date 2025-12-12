@@ -27,7 +27,7 @@ public class AccessTokenService {
 
     @Autowired
     public AccessTokenService(
-            UserRepository userRepository
+        UserRepository userRepository
     ) {
         this.userRepository = userRepository;
     }
@@ -46,18 +46,18 @@ public class AccessTokenService {
 
     private String generate(String subject, Long expireTime, SecretKey secretKey) {
         return Jwts.builder()
-                .subject(subject)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expireTime))
-                .signWith(secretKey)
-                .compact();
+            .subject(subject)
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + expireTime))
+            .signWith(secretKey)
+            .compact();
     }
 
     private Claims extract(String token, SecretKey secretKey) {
         return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 }

@@ -18,8 +18,8 @@ public class UserService {
 
     @Autowired
     public UserService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -27,13 +27,13 @@ public class UserService {
 
     public UserModel getUserByUserId(UUID userId) {
         return this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId.toString()));
     }
 
     @Transactional
     public UserModel updateUserDetailsByUserId(UUID userId, UpdateUserDetailsByIdRequest updateUserDetailsRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (updateUserDetailsRequest.getFirstName() != null && !updateUserDetailsRequest.getFirstName().isEmpty()) {
             updatedUser.setFirstName(updateUserDetailsRequest.getFirstName());
@@ -49,7 +49,7 @@ public class UserService {
     @Transactional
     public UserModel updatePasswordByUserId(UUID userId, UpdatePasswordByIdRequest updatePasswordRequest) {
         UserModel updatedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (!this.passwordEncoder.matches(updatePasswordRequest.getPassword(), updatedUser.getPassword())) {
             throw new IllegalArgumentException("Invalid credentials");
@@ -63,7 +63,7 @@ public class UserService {
     @Transactional
     public UserModel deleteUserByUserId(UUID userId) {
         UserModel deletedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         deletedUser.setIsEnabled(false);
         deletedUser.setIsAccountNonExpired(false);

@@ -32,11 +32,11 @@ public class TargetService {
 
     @Autowired
     public TargetService(
-            TargetRepository targetRepository,
-            ObjectMapper objectMapper,
-            ObjectValidator objectValidator,
-            CryptoManager cryptoManager,
-            LLMProviderResolver llmProviderResolver
+        TargetRepository targetRepository,
+        ObjectMapper objectMapper,
+        ObjectValidator objectValidator,
+        CryptoManager cryptoManager,
+        LLMProviderResolver llmProviderResolver
     ) {
         this.targetRepository = targetRepository;
         this.objectMapper = objectMapper;
@@ -47,7 +47,7 @@ public class TargetService {
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
         return this.targetRepository.findByUser_IdAndId(userId, targetId)
-                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+            .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
     }
 
     public Page<TargetModel> getTargets(Pageable pageable) {
@@ -66,12 +66,12 @@ public class TargetService {
         createdTarget.setProvider(provider);
 
         Object configObject = this.objectMapper
-                .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
+            .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
 
         this.objectValidator.validate(configObject);
 
         LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
-        if (!llmProvider.testConnection(configObject)) {
+        if (llmProvider.testConnection(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
 
@@ -87,7 +87,7 @@ public class TargetService {
     @Transactional
     public TargetModel updateTargetByTargetId(UUID userId, UUID targetId, UpdateTargetRequest updateTargetRequest) {
         TargetModel updatedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
-                .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
+            .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
 
         if (updateTargetRequest.getTargetName() != null && !updateTargetRequest.getTargetName().isEmpty()) {
             updatedTarget.setName(updateTargetRequest.getTargetName());
@@ -99,12 +99,12 @@ public class TargetService {
 
         if (updateTargetRequest.getConfig() != null) {
             Object configObject = this.objectMapper
-                    .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
+                .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
 
             this.objectValidator.validate(configObject);
 
             LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
-            if (!llmProvider.testConnection(configObject)) {
+            if (llmProvider.testConnection(configObject)) {
                 throw new IllegalStateException("Connection failed, Please check your credentials");
             }
 

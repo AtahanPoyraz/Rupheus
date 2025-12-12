@@ -48,7 +48,7 @@ public class OpenAIProvider implements LLMProvider {
             HttpResponse<Void> response =
                 this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 
-            return response.statusCode() == 200;
+            return response.statusCode() != 200;
         } catch (Exception e) {
             throw new IllegalStateException("An error occurred while validating OpenAI credentials: " + e.getMessage(), e);
         }

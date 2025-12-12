@@ -34,27 +34,27 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                List.of(
-                        this.frontendUrl
-                )
+            List.of(
+                this.frontendUrl
+            )
         );
         configuration.setAllowedMethods(
-                List.of(
-                        HttpMethod.GET.name(),
-                        HttpMethod.POST.name(),
-                        HttpMethod.PATCH.name(),
-                        HttpMethod.DELETE.name(),
-                        HttpMethod.PATCH.name(),
-                        HttpMethod.OPTIONS.name()
-                )
+            List.of(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PATCH.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.PATCH.name(),
+                HttpMethod.OPTIONS.name()
+            )
         );
         configuration.setAllowedHeaders(
-                List.of(
-                        HttpHeaders.COOKIE,
-                        HttpHeaders.AUTHORIZATION,
-                        HttpHeaders.CONTENT_TYPE,
-                        "X-Requested-With"
-                )
+            List.of(
+                HttpHeaders.COOKIE,
+                HttpHeaders.AUTHORIZATION,
+                HttpHeaders.CONTENT_TYPE,
+                "X-Requested-With"
+            )
         );
         configuration.setAllowCredentials(true);
 
@@ -65,37 +65,37 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            AuthenticationFilter authenticationFilter
+        HttpSecurity http,
+        AuthenticationFilter authenticationFilter
     ) throws Exception {
         http
-                .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(
-                        authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
-                        .requestMatchers(
-                                "/actuator/health",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api/v1/auth/**"
-                        )
-                        .permitAll()
-                        .requestMatchers(
-                                "/api/v1/user/**",
-                                "api/v1/target/**"
-                        )
-                        .authenticated()
-                        .requestMatchers(
-                                "/api/v1/admin/**"
-                        )
-                        .hasAnyRole("ADMIN")
-                        .anyRequest()
-                        .denyAll()
-                )
-                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .cors(Customizer.withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(
+                authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
+                    .requestMatchers(
+                        "/actuator/health",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/api/v1/auth/**"
+                    )
+                    .permitAll()
+                    .requestMatchers(
+                        "/api/v1/user/**",
+                        "api/v1/target/**"
+                    )
+                    .authenticated()
+                    .requestMatchers(
+                        "/api/v1/admin/**"
+                    )
+                    .hasAnyRole("ADMIN")
+                    .anyRequest()
+                    .denyAll()
+            )
+            .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

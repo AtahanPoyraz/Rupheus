@@ -1,6 +1,6 @@
 package ai.rupheus.application.config.security;
 
-import ai.rupheus.application.common.crypto.logger.ApplicationLogger;
+import ai.rupheus.application.common.logger.ApplicationLogger;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.service.AccessTokenService;
 import org.springframework.lang.NonNull;
@@ -26,8 +26,8 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     public AuthenticationFilter(
-            AccessTokenService accessTokenService,
-            ApplicationLogger applicationLogger
+        AccessTokenService accessTokenService,
+        ApplicationLogger applicationLogger
     ) {
         this.accessTokenService = accessTokenService;
         this.applicationLogger = applicationLogger;
@@ -35,9 +35,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest httpServletRequest,
-            @NonNull HttpServletResponse httpServletResponse,
-            @NonNull FilterChain filterChain
+        @NonNull HttpServletRequest httpServletRequest,
+        @NonNull HttpServletResponse httpServletResponse,
+        @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         try {
             String accessToken = this.getAccessTokenFromCookies(httpServletRequest);
@@ -58,7 +58,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             }
 
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                    new UsernamePasswordAuthenticationToken(user.get().getId(), null, user.get().getAuthorities());
+                new UsernamePasswordAuthenticationToken(user.get().getId(), null, user.get().getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             filterChain.doFilter(httpServletRequest, httpServletResponse);
@@ -74,9 +74,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
 
         return Arrays.stream(httpServletRequest.getCookies())
-                .filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
+            .filter(cookie -> "ACCESS_TOKEN".equals(cookie.getName()))
+            .findFirst()
+            .map(Cookie::getValue)
+            .orElse(null);
     }
 }

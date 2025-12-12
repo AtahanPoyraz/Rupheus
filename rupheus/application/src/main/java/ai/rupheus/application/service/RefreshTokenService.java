@@ -27,8 +27,8 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     public RefreshTokenService(
-            UserRepository userRepository,
-            RefreshTokenRepository refreshTokenRepository
+        UserRepository userRepository,
+        RefreshTokenRepository refreshTokenRepository
     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -37,7 +37,7 @@ public class RefreshTokenService {
     @Transactional
     public String generateRefreshToken(UUID userId) {
         UserModel user = this.userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         String rawToken = this.generateSecureToken(this.refreshTokenByteSize);
 
@@ -58,21 +58,21 @@ public class RefreshTokenService {
         }
 
         return this.refreshTokenRepository
-                .findByTokenHashAndIsRevokedFalseAndExpiresAtAfter(
-                        DigestUtils.sha256Hex(rawToken),
-                        LocalDateTime.now()
-                )
-                .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
+            .findByTokenHashAndIsRevokedFalseAndExpiresAtAfter(
+                DigestUtils.sha256Hex(rawToken),
+                LocalDateTime.now()
+            )
+            .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
     }
 
     @Transactional
     public void revokeToken(String rawToken) {
         this.refreshTokenRepository
-                .findByTokenHash(DigestUtils.sha256Hex(rawToken))
-                .ifPresent(t -> {
-                    t.setIsRevoked(true);
-                    this.refreshTokenRepository.save(t);
-                });
+            .findByTokenHash(DigestUtils.sha256Hex(rawToken))
+            .ifPresent(t -> {
+                t.setIsRevoked(true);
+                this.refreshTokenRepository.save(t);
+            });
     }
 
     private String generateSecureToken(int byteSize) {
