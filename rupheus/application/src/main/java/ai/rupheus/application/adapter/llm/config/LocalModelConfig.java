@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocalModelConfig {
-    @NotEmpty(message = "Endpoint cannot be empty")
-    private String endpoint;
+    @NotEmpty(message = "Url cannot be empty")
+    private String url;
 
-    @NotEmpty(message = "Validate url cannot be empty")
-    private String validateUrl;
+    @NotEmpty(message = "Validation endpoint cannot be empty")
+    private String validationEndpoint;
     private String modelName;
     private String apiKey;
 }

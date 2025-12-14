@@ -20,7 +20,7 @@ public class LLMProviderResolver {
 
     public LLMProvider resolve(Provider provider) {
         if (provider == null) {
-            throw new IllegalArgumentException("connectionScheme can not be null");
+            throw new IllegalArgumentException("Provider cannot be null");
         }
 
         return switch (provider) {

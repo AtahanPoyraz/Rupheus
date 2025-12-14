@@ -39,7 +39,7 @@ public class LocalModelProvider implements LLMProvider {
     public boolean testConnection(Object config) {
         LocalModelConfig localModelConfig = (LocalModelConfig) config;
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(localModelConfig.getValidateUrl()))
+            .uri(URI.create(localModelConfig.getUrl() + localModelConfig.getValidationEndpoint()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + localModelConfig.getApiKey())
             .GET()
             .build();
