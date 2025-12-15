@@ -14,6 +14,7 @@ import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -174,7 +175,7 @@ public class AdminService {
         this.objectValidator.validate(configObject);
 
         LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
-        if (llmProvider.testConnection(configObject)) {
+        if (!llmProvider.isConnectionVerified(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
 
@@ -201,19 +202,23 @@ public class AdminService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            Object configObject = this.objectMapper
-                .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
+            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
 
-            this.objectValidator.validate(configObject);
+            Object existingConfig = this.objectMapper.convertValue(
+                updatedTarget.getConfig(),
+                provider.getConfigClass()
+            );
 
-            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
-            if (llmProvider.testConnection(configObject)) {
-                throw new IllegalStateException("Connection failed, Please check your credentials");
-            }
+            Object incomingConfig = this.objectMapper.convertValue(
+                updateTargetRequest.getConfig(),
+                provider.getConfigClass()
+            );
 
-            this.cryptoManager.encryptField(updateTargetRequest.getConfig(), "apiKey");
+            Object mergedConfig = provider.mergeConfig(existingConfig, incomingConfig);
 
-            updatedTarget.setConfig(updateTargetRequest.getConfig());
+            updatedTarget.setConfig(
+                this.objectMapper.convertValue(mergedConfig, new TypeReference<>() {})
+            );
         }
 
         updatedTarget.setStatus(TargetStatus.CONNECTED);

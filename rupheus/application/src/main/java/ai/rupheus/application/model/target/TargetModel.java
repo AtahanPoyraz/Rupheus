@@ -34,11 +34,11 @@ public class TargetModel {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "scheme", nullable = false)
+    @Column(name = "provider", nullable = false)
     private Provider provider;
 
     @JdbcTypeCode(SqlTypes.JSON)

@@ -11,6 +11,7 @@ import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
 import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.repository.TargetRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -46,16 +47,30 @@ public class TargetService {
     }
 
     public TargetModel getTargetByTargetId(UUID userId, UUID targetId) {
-        return this.targetRepository.findByUser_IdAndId(userId, targetId)
+        TargetModel fetchedTarget = this.targetRepository.findByUser_IdAndId(userId, targetId)
             .orElseThrow(() -> new EntityNotFoundException("Target not found with id: " + targetId));
-    }
 
-    public Page<TargetModel> getTargets(Pageable pageable) {
-        return this.targetRepository.findAll(pageable);
+        this.cryptoManager.encryptField(fetchedTarget.getConfig(), "apiKey");
+
+        return fetchedTarget;
     }
 
     public List<TargetModel> getTargetByUserId(UUID userId) {
-        return this.targetRepository.findAllByUser_Id(userId);
+        List<TargetModel> fetchedTargets = this.targetRepository.findAllByUser_Id(userId);
+        for (TargetModel fetchedTarget : fetchedTargets) {
+            this.cryptoManager.decryptField(fetchedTarget.getConfig(), "apiKey");
+        }
+
+        return fetchedTargets;
+    }
+
+    public Page<TargetModel> getTargets(Pageable pageable) {
+        Page<TargetModel> fetchedTargets = this.targetRepository.findAll(pageable);
+        for (TargetModel fetchedTarget : fetchedTargets.getContent()) {
+            this.cryptoManager.decryptField(fetchedTarget.getConfig(), "apiKey");
+        }
+
+        return fetchedTargets;
     }
 
     @Transactional
@@ -65,13 +80,15 @@ public class TargetService {
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
         createdTarget.setProvider(provider);
 
-        Object configObject = this.objectMapper
-            .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
+        Object configObject = this.objectMapper.convertValue(
+            createTargetRequest.getConfig(),
+            provider.getConfigClass()
+        );
 
         this.objectValidator.validate(configObject);
 
         LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
-        if (llmProvider.testConnection(configObject)) {
+        if (!llmProvider.isConnectionVerified(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
 
@@ -98,19 +115,23 @@ public class TargetService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            Object configObject = this.objectMapper
-                .convertValue(updateTargetRequest.getConfig(), updatedTarget.getProvider().getConfigClass());
+            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
 
-            this.objectValidator.validate(configObject);
+            Object existingConfig = this.objectMapper.convertValue(
+                updatedTarget.getConfig(),
+                provider.getConfigClass()
+            );
 
-            LLMProvider llmProvider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
-            if (llmProvider.testConnection(configObject)) {
-                throw new IllegalStateException("Connection failed, Please check your credentials");
-            }
+            Object incomingConfig = this.objectMapper.convertValue(
+                updateTargetRequest.getConfig(),
+                provider.getConfigClass()
+            );
 
-            this.cryptoManager.encryptField(updateTargetRequest.getConfig(), "apiKey");
+            Object mergedConfig = provider.mergeConfig(existingConfig, incomingConfig);
 
-            updatedTarget.setConfig(updateTargetRequest.getConfig());
+            updatedTarget.setConfig(
+                this.objectMapper.convertValue(mergedConfig, new TypeReference<>() {})
+            );
         }
 
         updatedTarget.setStatus(TargetStatus.CONNECTED);

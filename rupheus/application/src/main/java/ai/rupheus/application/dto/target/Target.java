@@ -1,14 +1,13 @@
 package ai.rupheus.application.dto.target;
 
 import ai.rupheus.application.dto.shared.PageableResponse;
-import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,55 +34,56 @@ public class Target {
         target.setStatus(targetModel.getStatus());
         target.setCreatedAt(targetModel.getCreatedAt());
         target.setUpdatedAt(targetModel.getUpdatedAt());
-
-        Map<String, Object> maskedConfig = null;
-        if (targetModel.getConfig() != null) {
-            maskedConfig = new HashMap<>(targetModel.getConfig());
-            maskedConfig.computeIfPresent("apiKey", (k, v) -> "************");
-        }
-
-        target.setConfig(maskedConfig);
+        target.setConfig(maskConfig(targetModel.getConfig()));
         return target;
     }
 
     public static List<Target> fromEntity(List<TargetModel> targetModels) {
-        List<Target> targets = new ArrayList<>();
-        for (TargetModel targetModel : targetModels) {
-            targets.add(fromEntity(targetModel));
-        }
-
-        return targets;
-    }
-
-    public static PageableResponse<List<Target>> fromPage(Page<TargetModel> targetModelPage) {
-        List<Target> targets = targetModelPage.getContent()
-            .stream()
+        return targetModels.stream()
             .map(Target::fromEntity)
             .toList();
+    }
 
-        PageableResponse<List<Target>> pageableResponse = new PageableResponse<>();
-        pageableResponse.setContent(targets);
+    public static PageableResponse<List<Target>> fromPage(Page<TargetModel> page) {
+        PageableResponse<List<Target>> response = new PageableResponse<>();
+        response.setContent(fromEntity(page.getContent()));
 
         PageableResponse.PageableInfo pageableInfo = new PageableResponse.PageableInfo();
-        pageableInfo.setPage(targetModelPage.getNumber());
-        pageableInfo.setSize(targetModelPage.getSize());
-        pageableInfo.setTotalItems(targetModelPage.getTotalElements());
-        pageableInfo.setTotalPages(targetModelPage.getTotalPages());
-
-        pageableInfo.setHasNext(targetModelPage.hasNext());
-        pageableInfo.setHasPrevious(targetModelPage.hasPrevious());
-        pageableInfo.setFirst(targetModelPage.isFirst());
-        pageableInfo.setLast(targetModelPage.isLast());
+        pageableInfo.setPage(page.getNumber());
+        pageableInfo.setSize(page.getSize());
+        pageableInfo.setTotalItems(page.getTotalElements());
+        pageableInfo.setTotalPages(page.getTotalPages());
+        pageableInfo.setHasNext(page.hasNext());
+        pageableInfo.setHasPrevious(page.hasPrevious());
+        pageableInfo.setFirst(page.isFirst());
+        pageableInfo.setLast(page.isLast());
 
         PageableResponse.SortInfo sortInfo = new PageableResponse.SortInfo();
-        sortInfo.setSorted(targetModelPage.getSort().isSorted());
-        sortInfo.setUnsorted(targetModelPage.getSort().isUnsorted());
-        sortInfo.setEmpty(targetModelPage.getSort().isEmpty());
+        sortInfo.setSorted(page.getSort().isSorted());
+        sortInfo.setUnsorted(page.getSort().isUnsorted());
+        sortInfo.setEmpty(page.getSort().isEmpty());
 
         pageableInfo.setSort(sortInfo);
+        response.setPageable(pageableInfo);
 
-        pageableResponse.setPageable(pageableInfo);
+        return response;
+    }
 
-        return pageableResponse;
+    private static Map<String, Object> maskConfig(Map<String, Object> config) {
+        if (config == null || config.isEmpty()) {
+            return null;
+        }
+
+        Map<String, Object> masked = new HashMap<>(config);
+        masked.computeIfPresent("apiKey", (k, v) -> maskApiKey(v));
+        return masked;
+    }
+
+    private static String maskApiKey(Object value) {
+        String key = value.toString();
+        if (key.length() <= 6) {
+            return "******";
+        }
+        return key.substring(0, 3) + "****" + key.substring(key.length() - 3);
     }
 }

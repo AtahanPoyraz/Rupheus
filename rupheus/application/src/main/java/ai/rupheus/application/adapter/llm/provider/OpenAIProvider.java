@@ -36,7 +36,35 @@ public class OpenAIProvider implements LLMProvider {
     }
 
     @Override
-    public boolean testConnection(Object config) {
+    public Object mergeConfig(Object existingConfig, Object incomingConfig) {
+        OpenAIConfig existing = (OpenAIConfig) existingConfig;
+        OpenAIConfig incoming = (OpenAIConfig) incomingConfig;
+
+        if (incoming.getApiKey() != null && !incoming.getApiKey().isEmpty()) {
+            existing.setApiKey(incoming.getApiKey());
+        }
+
+        if (incoming.getModel() != null && !incoming.getModel().isEmpty()) {
+            existing.setModel(incoming.getModel());
+        }
+
+        if (incoming.getTemperature() != null) {
+            existing.setTemperature(incoming.getTemperature());
+        }
+
+        if (incoming.getMaxToken() != null) {
+            existing.setMaxToken(incoming.getMaxToken());
+        }
+
+        if (incoming.getSystemPrompt() != null && !incoming.getSystemPrompt().isEmpty()) {
+            existing.setSystemPrompt(incoming.getSystemPrompt());
+        }
+
+        return existing;
+    }
+
+    @Override
+    public boolean isConnectionVerified(Object config) {
         OpenAIConfig openAIConfig = (OpenAIConfig) config;
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(baseUrl + "/v1/models"))
@@ -48,7 +76,7 @@ public class OpenAIProvider implements LLMProvider {
             HttpResponse<Void> response =
                 this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 
-            return response.statusCode() != 200;
+            return response.statusCode() == 200;
         } catch (Exception e) {
             throw new IllegalStateException("An error occurred while validating OpenAI credentials: " + e.getMessage(), e);
         }

@@ -36,7 +36,43 @@ public class LocalModelProvider implements LLMProvider {
     }
 
     @Override
-    public boolean testConnection(Object config) {
+    public Object mergeConfig(Object existingConfig, Object incomingConfig) {
+        LocalModelConfig existing = (LocalModelConfig) existingConfig;
+        LocalModelConfig incoming = (LocalModelConfig) incomingConfig;
+
+        if (incoming.getApiKey() != null && !incoming.getApiKey().isEmpty()) {
+            existing.setApiKey(incoming.getApiKey());
+        }
+
+        if (incoming.getUrl() != null && !incoming.getUrl().isEmpty()) {
+            existing.setUrl(incoming.getUrl());
+        }
+
+        if (incoming.getValidationEndpoint() != null && !incoming.getValidationEndpoint().isEmpty()) {
+            existing.setValidationEndpoint(incoming.getValidationEndpoint());
+        }
+
+        if (incoming.getModel() != null && !incoming.getModel().isEmpty()) {
+            existing.setModel(incoming.getModel());
+        }
+
+        if (incoming.getTemperature() != null) {
+            existing.setTemperature(incoming.getTemperature());
+        }
+
+        if (incoming.getMaxToken() != null) {
+            existing.setMaxToken(incoming.getMaxToken());
+        }
+
+        if (incoming.getSystemPrompt() != null && !incoming.getSystemPrompt().isEmpty()) {
+            existing.setSystemPrompt(incoming.getSystemPrompt());
+        }
+
+        return existing;
+    }
+
+    @Override
+    public boolean isConnectionVerified(Object config) {
         LocalModelConfig localModelConfig = (LocalModelConfig) config;
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(localModelConfig.getUrl() + localModelConfig.getValidationEndpoint()))
@@ -48,7 +84,7 @@ public class LocalModelProvider implements LLMProvider {
             HttpResponse<Void> response =
                 this.httpClient.send(request, HttpResponse.BodyHandlers.discarding());
 
-            return response.statusCode() != 200;
+            return response.statusCode() == 200;
         } catch (Exception e) {
             throw new IllegalStateException("An error occurred while validating Local Model credentials: " + e.getMessage(), e);
         }

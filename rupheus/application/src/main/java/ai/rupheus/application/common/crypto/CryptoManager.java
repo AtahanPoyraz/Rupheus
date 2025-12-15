@@ -85,15 +85,44 @@ public class CryptoManager {
         }
     }
 
-    public void encryptField(Map<String, Object> config, String field) {
-        if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.encrypt(config.get(field).toString()));
+    public void encryptField(Map<String, Object> map, String field) {
+        if (map.containsKey(field) && map.get(field) != null) {
+            map.put(field, this.encrypt(map.get(field).toString()));
         }
     }
 
-    public void decryptField(Map<String, Object> config, String field) {
-        if (config.containsKey(field) && config.get(field) != null) {
-            config.put(field, this.decrypt(config.get(field).toString()));
+    public void decryptField(Map<String, Object> map, String field) {
+        if (!map.containsKey(field)) {
+            return;
+        }
+
+        Object value = map.get(field);
+        if (value == null) {
+            return;
+        }
+
+        String stringValue = value.toString();
+        if (stringValue.isBlank() || stringValue.contains("*")) {
+            return;
+        }
+
+        if (!isBase64(stringValue)) {
+            return;
+        }
+
+        try {
+            map.put(field, this.decrypt(stringValue));
+        } catch (Exception e) {
+            this.applicationLogger.warn(CryptoManager.class, "An error occurred while decrypting field: " + e.getMessage());
+        }
+    }
+
+    private boolean isBase64(String value) {
+        try {
+            Base64.getDecoder().decode(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 }
