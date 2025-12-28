@@ -1,4 +1,4 @@
-package ai.rupheus.application.dto.admin;
+package ai.rupheus.application.dto.admin.user;
 
 import ai.rupheus.application.dto.shared.PageableResponse;
 import ai.rupheus.application.model.user.UserModel;

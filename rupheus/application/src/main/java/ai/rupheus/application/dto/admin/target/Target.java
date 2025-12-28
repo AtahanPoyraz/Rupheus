@@ -1,7 +1,7 @@
-package ai.rupheus.application.dto.admin;
+package ai.rupheus.application.dto.admin.target;
 
 import ai.rupheus.application.dto.shared.PageableResponse;
-import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetProvider;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ public class Target {
     private UUID id;
     private String name;
     private String description;
-    private Provider provider;
+    private TargetProvider targetProvider;
     private Map<String, Object> config;
     private TargetStatus status;
     private LocalDateTime createdAt;
@@ -30,7 +30,7 @@ public class Target {
         target.setId(targetModel.getId());
         target.setName(targetModel.getName());
         target.setDescription(targetModel.getDescription());
-        target.setProvider(targetModel.getProvider());
+        target.setTargetProvider(targetModel.getTargetProvider());
         target.setStatus(targetModel.getStatus());
         target.setCreatedAt(targetModel.getCreatedAt());
         target.setUpdatedAt(targetModel.getUpdatedAt());

@@ -1,7 +1,9 @@
 package ai.rupheus.application.model.target;
 
+import ai.rupheus.application.model.simulation.SimulationModel;
 import ai.rupheus.application.model.user.UserModel;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +13,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,7 +43,7 @@ public class TargetModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false)
-    private Provider provider;
+    private TargetProvider targetProvider;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "config", columnDefinition = "jsonb")
@@ -59,6 +63,15 @@ public class TargetModel {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @JsonManagedReference
+    @OneToMany(
+        mappedBy = "target",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<SimulationModel> simulations = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

@@ -1,4 +1,4 @@
-package ai.rupheus.application.dto.admin;
+package ai.rupheus.application.dto.admin.target;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package ai.rupheus.application.adapter.llm.provider;
 
-import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +18,12 @@ public class LLMProviderResolver {
         this.localModelProvider = localModelProvider;
     }
 
-    public LLMProvider resolve(Provider provider) {
-        if (provider == null) {
+    public LLMProvider resolve(TargetProvider targetProvider) {
+        if (targetProvider == null) {
             throw new IllegalArgumentException("Provider cannot be null");
         }
 
-        return switch (provider) {
+        return switch (targetProvider) {
             case OPENAI -> this.openAIProvider;
             case LOCALMODEL -> this.localModelProvider;
         };

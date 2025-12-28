@@ -1,6 +1,7 @@
 package ai.rupheus.application.model.user;
 
 import ai.rupheus.application.model.auth.RefreshTokenModel;
+import ai.rupheus.application.model.simulation.SimulationModel;
 import ai.rupheus.application.model.target.TargetModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -83,6 +84,15 @@ public class UserModel implements UserDetails, Serializable {
             orphanRemoval = true
     )
     private List<TargetModel> targets = new ArrayList<>();
+
+    @JsonManagedReference
+    @OneToMany(
+        mappedBy = "user",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<SimulationModel> simulations = new ArrayList<>();
 
     @JsonIgnore
     @Override

@@ -1,4 +1,4 @@
-package ai.rupheus.application.dto.admin;
+package ai.rupheus.application.dto.admin.target;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

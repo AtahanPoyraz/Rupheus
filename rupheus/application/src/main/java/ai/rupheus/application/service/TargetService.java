@@ -9,7 +9,7 @@ import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetProvider;
 import ai.rupheus.application.repository.TargetRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,20 +74,20 @@ public class TargetService {
     }
 
     @Transactional
-    public TargetModel createTarget(UserModel user, Provider provider, CreateTargetRequest createTargetRequest) {
+    public TargetModel createTarget(UserModel user, TargetProvider targetProvider, CreateTargetRequest createTargetRequest) {
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setProvider(provider);
+        createdTarget.setTargetProvider(targetProvider);
 
         Object configObject = this.objectMapper.convertValue(
             createTargetRequest.getConfig(),
-            provider.getConfigClass()
+            targetProvider.getConfigClass()
         );
 
         this.objectValidator.validate(configObject);
 
-        LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
+        LLMProvider llmProvider = this.llmProviderResolver.resolve(targetProvider);
         if (!llmProvider.isConnectionVerified(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
@@ -115,7 +115,7 @@ public class TargetService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
+            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getTargetProvider());
 
             Object existingConfig = this.objectMapper.convertValue(
                 updatedTarget.getConfig(),

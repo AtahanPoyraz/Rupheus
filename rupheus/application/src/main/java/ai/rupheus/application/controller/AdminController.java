@@ -1,10 +1,15 @@
 package ai.rupheus.application.controller;
 
-import ai.rupheus.application.dto.admin.*;
+import ai.rupheus.application.dto.admin.target.CreateTargetRequest;
+import ai.rupheus.application.dto.admin.target.Target;
+import ai.rupheus.application.dto.admin.target.UpdateTargetRequest;
+import ai.rupheus.application.dto.admin.user.CreateUserRequest;
+import ai.rupheus.application.dto.admin.user.UpdateUserRequest;
+import ai.rupheus.application.dto.admin.user.User;
 import ai.rupheus.application.dto.shared.GenericResponse;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetProvider;
 import ai.rupheus.application.service.AdminService;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
@@ -161,10 +166,10 @@ public class AdminController {
 
     @PostMapping("/target")
     public ResponseEntity<GenericResponse<?>> createTarget(
-        @RequestParam Provider provider,
+        @RequestParam TargetProvider targetProvider,
         @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
-        TargetModel createdTarget = this.adminService.createTarget(provider, createTargetRequest);
+        TargetModel createdTarget = this.adminService.createTarget(targetProvider, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(
                 new GenericResponse<>(

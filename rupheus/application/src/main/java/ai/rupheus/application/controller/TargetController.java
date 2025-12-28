@@ -5,8 +5,8 @@ import ai.rupheus.application.dto.target.CreateTargetRequest;
 import ai.rupheus.application.dto.target.Target;
 import ai.rupheus.application.dto.target.UpdateTargetRequest;
 import ai.rupheus.application.model.target.TargetModel;
+import ai.rupheus.application.model.target.TargetProvider;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.Provider;
 import ai.rupheus.application.service.TargetService;
 import ai.rupheus.application.service.UserService;
 import jakarta.validation.Valid;
@@ -83,11 +83,11 @@ public class TargetController {
 
     @PostMapping
     public ResponseEntity<GenericResponse<?>> createTarget(
-        @RequestParam Provider provider,
+        @RequestParam TargetProvider targetProvider,
         @Valid @RequestBody CreateTargetRequest createTargetRequest
     ) {
         UserModel fetchedUser = this.getUserFromSecurityContext();
-        TargetModel createdTarget = this.targetService.createTarget(fetchedUser, provider, createTargetRequest);
+        TargetModel createdTarget = this.targetService.createTarget(fetchedUser, targetProvider, createTargetRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(
                 new GenericResponse<>(

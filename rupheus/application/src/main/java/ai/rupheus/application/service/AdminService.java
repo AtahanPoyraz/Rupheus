@@ -1,17 +1,17 @@
 package ai.rupheus.application.service;
 
 import ai.rupheus.application.common.crypto.CryptoManager;
-import ai.rupheus.application.dto.admin.CreateTargetRequest;
-import ai.rupheus.application.dto.admin.CreateUserRequest;
-import ai.rupheus.application.dto.admin.UpdateTargetRequest;
-import ai.rupheus.application.dto.admin.UpdateUserRequest;
+import ai.rupheus.application.dto.admin.target.CreateTargetRequest;
+import ai.rupheus.application.dto.admin.user.CreateUserRequest;
+import ai.rupheus.application.dto.admin.target.UpdateTargetRequest;
+import ai.rupheus.application.dto.admin.user.UpdateUserRequest;
 import ai.rupheus.application.adapter.llm.provider.LLMProvider;
 import ai.rupheus.application.adapter.llm.provider.LLMProviderResolver;
 import ai.rupheus.application.common.validator.ObjectValidator;
 import ai.rupheus.application.model.target.TargetModel;
 import ai.rupheus.application.model.target.TargetStatus;
 import ai.rupheus.application.model.user.UserModel;
-import ai.rupheus.application.model.target.Provider;
+import ai.rupheus.application.model.target.TargetProvider;
 import ai.rupheus.application.repository.TargetRepository;
 import ai.rupheus.application.repository.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,6 +31,7 @@ import java.util.UUID;
 public class AdminService {
     private final UserRepository userRepository;
     private final TargetRepository targetRepository;
+    private final SimulationRepository simulationRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
     private final ObjectValidator objectValidator;
@@ -41,6 +42,7 @@ public class AdminService {
     public AdminService(
         UserRepository userRepository,
         TargetRepository targetRepository,
+        SimulationRepository simulationRepository,
         PasswordEncoder passwordEncoder,
         ObjectMapper objectMapper,
         ObjectValidator objectValidator,
@@ -49,6 +51,7 @@ public class AdminService {
     ) {
         this.userRepository = userRepository;
         this.targetRepository = targetRepository;
+        this.simulationRepository = simulationRepository;
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
         this.objectValidator = objectValidator;
@@ -160,21 +163,21 @@ public class AdminService {
     }
 
     @Transactional
-    public TargetModel createTarget(Provider provider, CreateTargetRequest createTargetRequest) {
+    public TargetModel createTarget(TargetProvider targetProvider, CreateTargetRequest createTargetRequest) {
         UserModel user = this.userRepository.findById(createTargetRequest.getUserId())
             .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + createTargetRequest.getUserId()));
 
         TargetModel createdTarget = new TargetModel();
         createdTarget.setName(createTargetRequest.getTargetName());
         createdTarget.setDescription(createTargetRequest.getTargetDescription());
-        createdTarget.setProvider(provider);
+        createdTarget.setTargetProvider(targetProvider);
 
         Object configObject = this.objectMapper
-            .convertValue(createTargetRequest.getConfig(), provider.getConfigClass());
+            .convertValue(createTargetRequest.getConfig(), targetProvider.getConfigClass());
 
         this.objectValidator.validate(configObject);
 
-        LLMProvider llmProvider = this.llmProviderResolver.resolve(provider);
+        LLMProvider llmProvider = this.llmProviderResolver.resolve(targetProvider);
         if (!llmProvider.isConnectionVerified(configObject)) {
             throw new IllegalStateException("Connection failed, Please check your credentials");
         }
@@ -202,7 +205,7 @@ public class AdminService {
         }
 
         if (updateTargetRequest.getConfig() != null) {
-            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getProvider());
+            LLMProvider provider = this.llmProviderResolver.resolve(updatedTarget.getTargetProvider());
 
             Object existingConfig = this.objectMapper.convertValue(
                 updatedTarget.getConfig(),
